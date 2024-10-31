@@ -27,17 +27,13 @@ Vision Statement: For movie watchers, who need a place to discuss and share movi
 Development Methodology: We decided on using agile methodology because it makes the most sense for weekly meetings.
 
 
-Communication Plan: We have decided to use text message to communicate quickly and discord to post more extensive communications
+Communication Plan: We have decided to use text message to communicate quickly and discord to post more extensive communications. We will also be having team meetings on Thursdays after our lab section.
 
 
-Meeting Plan: Meetings with TA on Mondays 5:00-5:15pm
+Meeting Plan: Meetings with TA on Mondays 5:00-5:15pm on Zoom
 
 
-
-
-
-
-Case Diagram:    
+Case Diagram: See Film-Portal/Lab9Case.png
 
 
 Wireframe: Made using figma (refer to readMe)
