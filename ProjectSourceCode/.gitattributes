@@ -1,0 +1,8 @@
+# Added this because I was gitting issues when adding our bootstrap dependancy files
+
+# Enforce LF line endings in the repository for all text files
+* text=auto
+
+# Specific rule for CSS and JS files
+*.css text eol=lf
+*.js text eol=lf
