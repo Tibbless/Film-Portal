@@ -7,9 +7,6 @@ CREATE TABLE Client (
     LastName VARCHAR(45),
     UserImage VARCHAR(255)
     UserImage VARCHAR(45)
-    -- CONSTRAINT fk_user
-    --     FOREIGN KEY(FriendId)
-    --         REFERENCES User(UserId)
 );
 
 CREATE TABLE Movie (
