@@ -6,9 +6,6 @@ CREATE TABLE Client (
     FirstName VARCHAR(45),
     LastName VARCHAR(45),
     UserImage VARCHAR(45)
-    -- CONSTRAINT fk_user
-    --     FOREIGN KEY(FriendId)
-    --         REFERENCES User(UserId)
 );
 
 CREATE TABLE Movie (
@@ -23,23 +20,19 @@ CREATE TABLE Review (
     ReviewBody TEXT NOT NULL,
     MovieRating INT NOT NULL,
     ReviewRating INT,
-    ClientId INT NOT NULL REFERENCES Client(ClientId),
-    -- CONSTRAINT fk_user
-    --     FOREIGN KEY(UserId)
-    --         REFERENCES User(UserId),
-    MovieId INT NOT NULL REFERENCES Movie(MovieId)
-    -- CONSTRAINT fk_movie
-    --     FOREIGN KEY(MovieId)
-    --         REFERENCES Movie(MovieId)
+    ClientId INT NOT NULL REFERENCES Client(ClientId) ON DELETE CASCADE,
+    MovieId INT NOT NULL REFERENCES Movie(MovieId) ON DELETE CASCADE
 );
 
 CREATE TABLE Comment (
     CommentId SERIAL PRIMARY KEY,
     CommentBody TEXT NOT NULL,
-    ReviewId INT NOT NULL REFERENCES Review(ReviewId)
-    -- CONSTRAINT fk_review
-    --    FOREIGN KEY(ReviewId)
-    --        REFERENCES Review(ReviewId)
+    ReviewId INT NOT NULL REFERENCES Review(ReviewId) ON DELETE CASCADE
 );
 
 
+CREATE TABLE Client_friend (
+    ClientId INT NOT NULL REFERENCES Client(ClientId) ON UPDATE CASCADE ON DELETE CASCADE
+    FriendId INT NOT NULL REFERENCES Client(ClientId) ON DELETE CASCADE
+    CONSTRAINT Client_friend PRIMARY KEY (ClientId, FriendID)
+);
