@@ -12,6 +12,7 @@ CREATE TABLE Movie (
     MovieId SERIAL PRIMARY KEY,
     MovieTitle VARCHAR(45) NOT NULL,
     MovieDescription TEXT,
+    ReleaseDate DATE,
     MovieImage VARCHAR(300)
 );
 
