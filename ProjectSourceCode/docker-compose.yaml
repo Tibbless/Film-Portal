@@ -9,7 +9,7 @@ services:
       # NOTE: to make this work with SELinux,
       # I need to add the :z at the end
       - lab-08-web-services:/var/lib/postgresql/data:z
-      - ./init_data:/docker-entrypoint-initdb.d:z
+      - ./src/init_data:/docker-entrypoint-initdb.d:z
   web:
     image: node:lts
     user: 'node'
