@@ -6,6 +6,7 @@ const path = require('path');
 const pgp = require('pg-promise')();
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const axios = require('axios');
 
 // -------------------------------------  APP CONFIG   ----------------------------------------------
 
@@ -56,6 +57,7 @@ db.connect()
     console.log('ERROR', error.message || error);
   });
 
+<<<<<<< HEAD
 const axios = require('axios');
 const pgp = require('pg-promise')();
 const dbConfig = {
@@ -66,6 +68,26 @@ const dbConfig = {
   password: process.env.POSTGRES_PASSWORD,
 };
 const db = pgp(dbConfig);
+=======
+function getMovies(title) {
+    const localMoviesData = getMoviesLocal(title)
+
+    if (!localMoviesData) {
+        getMoviesExternal(title)
+    } else {
+        return localMoviesData
+    }
+}
+
+function getMoviesLocal(title) {
+    const query = `select * from Movies where MoviesTitle like $1`
+    const values = [title]
+
+    db.one(query, values)
+      .then(data => { console.log(data) })
+      .catch(error => { console.log(error) })
+}
+>>>>>>> 73bc626 (Rebased with main)
 
 function getMovies(title) {
     const localMoviesData = getMoviesLocal(title) 
@@ -118,7 +140,6 @@ function getMoviesExternal(title) {
     }))
       .catch(error => console.log(error))
 }
-
 app.get('/login', (req, res) => {
   res.render('pages/login');
 });
