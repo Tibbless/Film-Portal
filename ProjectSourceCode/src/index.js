@@ -1,13 +1,42 @@
 const axios = require('axios');
+const pgp = require('pg-promise')();
+const dbConfig = {
+  host: 'db',
+  port: 5432,
+  database: process.env.POSTGRES_DB,
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+};
+const db = pgp(dbConfig);
 
-function getMovies(query) {
+function getMovies(title) {
+    const localMoviesData = getMoviesLocal(title) 
+
+    if (!localMoviesData) {
+        getMoviesExternal(title)
+    } else {
+        return localMoviesData
+    }
+}
+
+
+function getMoviesLocal(title) {
+    const query = `select * from Movies where MoviesTitle like $1`
+    const values = [title]
+
+    db.one(query, values)
+      .then(data => { console.log(data) })
+      .catch(error => { console.log(error) })
+}
+
+function getMoviesExternal(title) {
     var moviesData = []
 
     axios({
         url: `https://api.themoviedb.org/3/search/movie`,
         method: `GET`,
         params: {
-            query: query,
+            query: title,
             include_adult: false,
             language: "en-USA",
             page: 1, // Limit API calls
@@ -27,7 +56,7 @@ function getMovies(query) {
             image: image
         }
 
-        return moviesData
+        console.log(moviesData)
     }))
       .catch(error => console.log(error))
 }
