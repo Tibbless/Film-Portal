@@ -6,9 +6,10 @@ services:
     ports:
       - "5432:5432"  # Maps PostgreSQL port to make it accessible
     volumes:
-      - lab-08-web-services:/var/lib/postgresql/data  # Volume for persistent database storage
-      - ./init_data:/docker-entrypoint-initdb.d  # Volume for initial data/scripts
-
+      # NOTE: to make this work with SELinux,
+      # I need to add the :z at the end
+      - lab-08-web-services:/var/lib/postgresql/data:z
+      - ./src/init_data:/docker-entrypoint-initdb.d:z
   web:
     image: node:lts
     user: 'node'
