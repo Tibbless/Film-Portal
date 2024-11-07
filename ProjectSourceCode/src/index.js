@@ -93,6 +93,31 @@ function getMovies(query) {
 app.get('/login', (req, res) => {
   res.render('pages/login');
 });
+app.get('/login', (req, res) => {
+  res.render('pages/login');
+});
+
+app.post('/login', (req, res) => {
+  res.redirect('/home');
+});
+
+app.get('/register', (req, res) => {
+  res.render('pages/register');
+});
+
+app.post('/register/add', (req, res) => {
+
+});
+
+app.get('/home', (req, res) => {
+  res.render('pages/home');
+});
+
+app.get('/welcome', (req, res) => {
+  res.json({status: 'success', message: 'Welcome!'});
+});
+
 
 app.listen(3000);
+module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
