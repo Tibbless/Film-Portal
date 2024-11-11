@@ -27,6 +27,11 @@ app.use(
     secret: process.env.SESSION_SECRET,
     saveUninitialized: true,
     resave: true,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',  // change to true latter when using HTTPS
+      httpOnly: true,  // to prevent XSS attacks
+      maxAge: 24 * 60 * 60 * 1000  // makes sure you cant have a webpage open for more than a day
+    }
   })
 );
 app.use(
@@ -57,6 +62,16 @@ db.connect()
   });
 
 const axios = require('axios');
+
+// hashing stuff
+const crypto = require('crypto');
+
+// hashing password
+function hashPassword(password) {
+  return crypto.createHash('sha256')  // using SHA256
+    .update(password)
+    .digest('hex');
+}
 
 function getMovies(query) {
     var moviesData = []
@@ -91,25 +106,81 @@ function getMovies(query) {
 }
 
 app.get('/login', (req, res) => {
-  res.render('pages/login');
-});
-app.get('/login', (req, res) => {
-  res.render('pages/login');
+  const error = req.session.error || null;
+  req.session.error = null;  // clear error message after passing it to the view
+
+  res.render('pages/login', { error });  // pass the error to the view
 });
 
-app.post('/login', (req, res) => {
-  res.redirect('/home');
+app.post('/login', async (req, res) => {
+  const { Email, Password } = req.body;
+
+  try {
+    // get user from database
+    const user = await db.oneOrNone('SELECT * FROM Client WHERE Email = $1', [Email]);
+
+    if (!user) {
+      // set error message in session if user is not found
+      req.session.error = 'Invalid email';
+      return res.redirect('/login');
+    }
+
+    // hash password and compare it to the stored hash
+    const hashedPassword = hashPassword(Password);
+
+    if (hashedPassword !== user.password) {
+      req.session.error = 'Invalid password';
+      return res.redirect('/login');
+    }
+
+    // set session user ID on successful login
+    req.session.userId = user.ClientId;
+    req.session.error = null;  // clear error after successful login
+    res.redirect('/home');
+  } catch (error) {
+    console.error('Error during login:', error);
+    req.session.error = 'An error occurred during login. Please try again.';
+    res.redirect('/login');
+  }
 });
 
 app.get('/register', (req, res) => {
   res.render('pages/register');
 });
 
-app.post('/register/add', (req, res) => {
+app.post('/register', async (req, res) => {
+  const { Username, Password, Email, FirstName, LastName } = req.body;
 
+  try {
+    // input validation
+    if (!Username || !Password || !Email) {
+      return res.render('pages/register', { error: 'Username, Password, and Email are required' });
+    }
+
+    // check if email already exists in the database so we dont get duplicate users
+    const existingUser = await db.oneOrNone('SELECT * FROM Client WHERE Email = $1', [Email]);
+    if (existingUser) {
+      return res.render('pages/register', { error: 'Email is already registered' });
+    }
+
+    // hashing password
+    const hashedPassword = hashPassword(Password);
+
+    // insert user into db
+    await db.none(
+      'INSERT INTO Client (Username, Password, Email, FirstName, LastName) VALUES ($1, $2, $3, $4, $5)', 
+      [Username, hashedPassword, Email, FirstName, LastName]
+    );
+
+    res.redirect('/login');
+  } catch (error) {
+    console.error('Error during registration:', error);
+    res.render('pages/register', { error: 'An error occurred during registration. Please try again.' });
+  }
 });
 
 app.get('/home', (req, res) => {
+
   res.render('pages/home');
 });
 
@@ -118,6 +189,6 @@ app.get('/welcome', (req, res) => {
 });
 
 
-//app.listen(3000);
-module.exports = app.listen(3000);
+app.listen(3000);
+// module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
