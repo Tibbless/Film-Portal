@@ -179,6 +179,7 @@ app.post('/register', async (req, res) => {
 
     res.redirect('/login');
   } catch (error) {
+    res.status(400);
     console.error('Error during registration:', error);
     res.render('pages/register', { error: 'An error occurred during registration. Please try again.' });
   }
