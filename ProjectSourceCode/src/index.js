@@ -165,10 +165,13 @@ db.connect()
 app.get('/login', (req, res) => {
   res.render('pages/login');
 });
+=======
+>>>>>>> dd7f7bc (Updated index.js)
 app.get('/login', (req, res) => {
   res.render('pages/login');
 });
 
+<<<<<<< HEAD
 app.post('/login', (req, res) => {
   res.redirect('/home');
 });
@@ -191,4 +194,7 @@ app.get('/welcome', (req, res) => {
 
 
 module.exports = app.listen(3000);
+=======
+app.listen(3000);
+>>>>>>> dd7f7bc (Updated index.js)
 console.log('Server is listening on port 3000');
