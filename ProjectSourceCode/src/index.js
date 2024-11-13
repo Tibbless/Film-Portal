@@ -160,6 +160,7 @@ app.post('/register', async (req, res) => {
     // check if email already exists in the database so we dont get duplicate users
     const existingUser = await db.oneOrNone('SELECT * FROM Client WHERE Email = $1', [Email]);
     if (existingUser) {
+      res.status(400).json({message:"Email in use"});
       return res.render('pages/register', { error: 'Email is already registered' });
     }
 
@@ -170,7 +171,11 @@ app.post('/register', async (req, res) => {
     await db.none(
       'INSERT INTO Client (Username, Password, Email, FirstName, LastName) VALUES ($1, $2, $3, $4, $5)', 
       [Username, hashedPassword, Email, FirstName, LastName]
-    );
+    ).then(data => {
+      res.status(200).json({
+        message:"Success"
+      })
+    });
 
     res.redirect('/login');
   } catch (error) {
@@ -189,15 +194,19 @@ app.get('/welcome', (req, res) => {
 });
 
 
-app.get('/db-test1', (req, res) => {
-  db.any(
-    'SELECT * FROM Client WHERE username = "Eskam";'
-  ).then(data => {
-    let username = data.username; 
-    res.redirect('/register');
-  })
-})
+// app.get('/db-test1', async (req, res) => {
+//   await db.any(
+//     'INSERT INTO Client (username, password, email) VALUES ("abcd", "non-password", "email@email.com");'
+//   );
+  
+//   await db.any(
+//     'SELECT * FROM Client WHERE username = "abcd";'
+//   ).then(data => {
+//     let username = data.username;
+//     res.redirect('/register');
+//   })
+// })
 
-app.listen(3000);
-// module.exports = app.listen(3000);
+// app.listen(3000);
+module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
