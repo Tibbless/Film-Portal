@@ -189,6 +189,15 @@ app.get('/welcome', (req, res) => {
 });
 
 
+app.get('/db-test1', (req, res) => {
+  db.any(
+    'SELECT * FROM Client WHERE username = "Eskam";'
+  ).then(data => {
+    let username = data.username; 
+    res.redirect('/register');
+  })
+})
+
 app.listen(3000);
 // module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');

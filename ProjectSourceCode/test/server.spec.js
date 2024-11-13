@@ -29,4 +29,17 @@ describe('Server!', () => {
 
 // *********************** TODO: WRITE 2 UNIT TESTCASES **************************
 
+describe('Database', () => {
+  it('Returns a simple query', done => {
+    chai.request(server)
+    .get('/db-test1')
+    .end((err, res) => {
+      expect(res).to.have.status(200);
+      expect(res.body.status).to.equals('success');
+      assert.strictEqual(res.body.data.username, 'Eskam');
+      done();
+    });
+  });
+});
+
 // ********************************************************************************
