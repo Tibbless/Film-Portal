@@ -46,6 +46,7 @@ const dbConfig = {
 };
 const db = pgp(dbConfig);
 
+
 async function apply(async_fetch, async_param, func) {
     try {
         return func(await async_fetch(async_param))
@@ -82,7 +83,7 @@ async function getMoviesExternal(title) {
             api_key: process.env.API_KEY
         }
     }
-
+    
     const organizeMovies = (response) => {
         var moviesData = []
 
@@ -146,7 +147,6 @@ db.connect()
   });
 
 
-
 app.get('/login', (req, res) => {
   res.render('pages/login');
 });
@@ -194,7 +194,6 @@ app.get('/test_query', (req, res) => {
             }
         )
 });
-
 
 module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');

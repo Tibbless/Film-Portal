@@ -1,6 +1,6 @@
 // ********************** Initialize server **********************************
 
-const server = require('../src/index'); //TODO: Make sure the path to your index.js is correctly added
+const server = require('../src/index.js');
 
 // ********************** Import Libraries ***********************************
 
@@ -9,6 +9,8 @@ const chaiHttp = require('chai-http');
 chai.should();
 chai.use(chaiHttp);
 const {assert, expect} = chai;
+
+console.log("serverspec test running");
 
 // ********************** DEFAULT WELCOME TESTCASE ****************************
 
@@ -28,6 +30,7 @@ describe('Server!', () => {
 });
 
 // *********************** TODO: WRITE 2 UNIT TESTCASES **************************
+
 
 // ********************************************************************************
 

@@ -3,8 +3,8 @@ services:
   db:
     image: postgres:14
     env_file: .env
-    expose:
-      - '5432'
+    ports:
+      - "5432"  # Maps PostgreSQL port to make it accessible
     volumes:
       # NOTE: to make this work with SELinux,
       # I need to add the :z at the end
@@ -20,15 +20,13 @@ services:
     depends_on:
       - db
     ports:
-      - '3000:3000'
+      - "3000:3000"  # Maps application port to host
     volumes:
       # NOTE: to make this work with SELinux,
       # I need to add the :z at the end
       - ./:/home/node/app:z
-    command: 'npm run test'
-# This defines our volume(s), which will persist throughout startups.
-# If you want to get rid of a hanging volume, e.g. to test your database init,
-# run `docker-compose rm -v`. Note that this will remove ALL of your data, so
-# be extra sure you've made a stable backup somewhere.
+    command: 'npm testandrun'
+
+# Persistent volume for database storage
 volumes:
   lab-08-web-services:
