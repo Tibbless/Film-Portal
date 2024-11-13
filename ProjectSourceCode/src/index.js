@@ -6,6 +6,7 @@ const path = require('path');
 const pgp = require('pg-promise')();
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const axios = require('axios')
 
 // -------------------------------------  APP CONFIG   ----------------------------------------------
 
@@ -45,6 +46,95 @@ const dbConfig = {
 };
 const db = pgp(dbConfig);
 
+
+async function apply(async_fetch, async_param, func) {
+    try {
+        return func(await async_fetch(async_param))
+    } catch (error) {
+        return {success: false, error}
+    }
+}
+
+async function getMoviesLocal(title) {
+    const query = 
+    `select * 
+        from movie 
+        where movietitle 
+        like $1
+        limit 1;`
+
+    try {
+        const movie = await db.one(query, [title])
+        return {success: true, movie}
+    } catch (error) {
+        return {success: false, error}
+    }
+}
+
+async function getMoviesExternal(title) {
+    const tmdb_query = {
+        url: `https://api.themoviedb.org/3/search/movie`,
+        method: `GET`,
+        params: {
+            query: title,
+            include_adult: false,
+            language: "en-USA",
+            page: 1, // Limit API calls
+            api_key: process.env.API_KEY
+        }
+    }
+    
+    const organizeMovies = (response) => {
+        var moviesData = []
+
+        response.data.results.forEach((result) => {
+            var image = null
+
+            if (result.poster_path) {
+                image = `https://image.tmdb.org/t/p/original/${result.poster_path}`
+            }
+
+            moviesData[moviesData.length] = {
+                title: result.title,
+                release_date: result.release_date,
+                description: result.overview,
+                image: image
+            }}
+        )
+
+        return {success: true, moviesData}
+    }
+
+    return await apply(axios, tmdb_query, organizeMovies)
+}
+
+async function cacheMovies(response) {
+    const moviesData = response.moviesData
+    const query = `
+        insert into Movie (MovieTitle, MovieDescription, ReleaseDate, MovieImage)
+        Values ($1, $2, $3, $4) 
+        returning *;
+    `
+    const firstMovie = moviesData[0]
+    const params = [firstMovie.title, firstMovie.description, firstMovie.release_date, firstMovie.image]
+    try {
+        const movie = await db.one(query, params)
+        return {success: true, movie}
+    } catch (error) {
+        return {success: false, error}
+    }
+}
+
+async function getMovies(title) {
+    const localRes = await getMoviesLocal(title)
+
+    if (localRes.success){
+        return localRes
+    } else {
+        return await apply(getMoviesExternal, title, cacheMovies)
+    }
+}
+
 // db test
 db.connect()
   .then(obj => {
@@ -56,43 +146,7 @@ db.connect()
     console.log('ERROR', error.message || error);
   });
 
-const axios = require('axios');
 
-function getMovies(query) {
-    var moviesData = []
-
-    axios({
-        url: `https://api.themoviedb.org/3/search/movie`,
-        method: `GET`,
-        params: {
-            query: query,
-            include_adult: false,
-            language: "en-USA",
-            page: 1, // Limit API calls
-            api_key: process.env.API_KEY
-        }
-    }).then(res => res.data.results.forEach((result) => {
-        var image = null
-
-        if (result.poster_path) {
-            image = `https://image.tmdb.org/t/p/original/${result.poster_path}`
-        }
-
-        moviesData[moviesData.length] = {
-            title: result.title,
-            release_date: result.release_date,
-            description: result.overview,
-            image: image
-        }
-
-        return moviesData
-    }))
-      .catch(error => console.log(error))
-}
-
-app.get('/login', (req, res) => {
-  res.render('pages/login');
-});
 app.get('/login', (req, res) => {
   res.render('pages/login');
 });
@@ -117,7 +171,29 @@ app.get('/welcome', (req, res) => {
   res.json({status: 'success', message: 'Welcome!'});
 });
 
+app.get('/test_database', (req, res) => {
+    const testOne = getMovies('Oddity')
+        .then(resultOne => {
+            const testTwo = getMoviesLocal('The Incredibles').
+                then(resultTwo => {
+                    res.json({status: 'success', message: {testOne: resultOne, testTwo: resultTwo}})
+                    }
+                )
+            }
+        )
+});
 
-//app.listen(3000);
+app.get('/test_query', (req, res) => {
+    const testOne = getMoviesExternal('Stargate')
+        .then(resultOne => {
+            const testTwo = getMovies('Coraline').
+                then(resultTwo => {
+                    res.json({status: 'success', message: {testOne: resultOne, testTwo: resultTwo}})
+                    }
+                )
+            }
+        )
+});
+
 module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');

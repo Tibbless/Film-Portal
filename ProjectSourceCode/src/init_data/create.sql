@@ -35,5 +35,8 @@ CREATE TABLE Comment (
 CREATE TABLE Client_friend (
     ClientId INT NOT NULL REFERENCES Client(ClientId) ON UPDATE CASCADE ON DELETE CASCADE,
     FriendId INT NOT NULL REFERENCES Client(ClientId) ON DELETE CASCADE,
+
     CONSTRAINT Client_friend_relation PRIMARY KEY (ClientId, FriendID)
 );
+
+\dt;
