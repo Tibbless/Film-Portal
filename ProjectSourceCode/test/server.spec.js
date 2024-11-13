@@ -1,6 +1,6 @@
 // ********************** Initialize server **********************************
 
-const server = require('../index'); //TODO: Make sure the path to your index.js is correctly added
+const server = require('../src/index'); //TODO: Make sure the path to your index.js is correctly added
 
 // ********************** Import Libraries ***********************************
 
@@ -30,3 +30,20 @@ describe('Server!', () => {
 // *********************** TODO: WRITE 2 UNIT TESTCASES **************************
 
 // ********************************************************************************
+
+// External API Calls
+describe('Server!', () => {
+  // Sample test case given to test / endpoint.
+  it('External API Call 1', done => {
+    chai
+      .request(server)
+      .get('/home')
+      .end((err, res) => {
+        //expect(res).to.have.status(200);
+        //expect(res.body.status).to.equals('success');
+        //assert.strictEqual(res.body.message, 'Welcome!');
+        //done();
+        done();
+      });
+  });
+});
