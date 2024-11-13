@@ -31,18 +31,54 @@ describe('Server!', () => {
 
 // ********************************************************************************
 
-// External API Calls
-describe('Server!', () => {
+describe('Database Tests', () => {
   // Sample test case given to test / endpoint.
-  it('External API Call 1', done => {
+
+  it('Local Query Succeeds (Movie in Database)', done => {
     chai
       .request(server)
-      .get('/home')
+      .get('/test_database')
       .end((err, res) => {
-        //expect(res).to.have.status(200);
-        //expect(res.body.status).to.equals('success');
-        //assert.strictEqual(res.body.message, 'Welcome!');
-        //done();
+        //expect(res).to.have.status(201);
+        assert.strictEqual(res.body.message.testOne.success, true)
+        done();
+      });
+  });
+
+  it('Local Query Fails (Movie Not in Database)', done => {
+    chai
+      .request(server)
+      .get('/test_database')
+      .end((err, res) => {
+        //expect(res).to.have.status(201);
+        assert.strictEqual(res.body.message.testTwo.success, false)
+        done();
+      });
+  });
+    
+
+});
+
+
+describe('Movie Retrieval Tests', () => {
+  // Sample test case given to test / endpoint.
+  it('TMDB Query', done => {
+    chai
+      .request(server)
+      .get('/test_query')
+      .end((err, res) => {
+        //expect(res).to.have.status(201);
+        assert.strictEqual(res.body.message.testOne.success, true) 
+        done();
+      });
+  });
+  it('Cache Successful', done => {
+    chai
+      .request(server)
+      .get('/test_query')
+      .end((err, res) => {
+        //expect(res).to.have.status(201);
+        assert.strictEqual(res.body.message.testTwo.success, true) 
         done();
       });
   });

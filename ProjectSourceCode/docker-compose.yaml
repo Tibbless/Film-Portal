@@ -25,7 +25,7 @@ services:
       # NOTE: to make this work with SELinux,
       # I need to add the :z at the end
       - ./:/home/node/app:z
-    command: 'npm run testandrun'
+    command: 'npm run test'
 # This defines our volume(s), which will persist throughout startups.
 # If you want to get rid of a hanging volume, e.g. to test your database init,
 # run `docker-compose rm -v`. Note that this will remove ALL of your data, so

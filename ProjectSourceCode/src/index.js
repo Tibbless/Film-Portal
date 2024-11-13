@@ -54,22 +54,6 @@ async function apply(async_fetch, async_param, func) {
     }
 }
 
-function onFailure(data, callback) {
-    if (data.success) {
-        return data 
-    } else {
-        return callback(data)
-    }
-}
-
-function onSuccess(data, callback) {
-    if (data.success) {
-        return callback(data)
-    } else {
-        return data
-    }
-}
-
 async function getMoviesLocal(title) {
     const query = 
     `select * 
@@ -143,10 +127,11 @@ async function cacheMovies(response) {
 async function getMovies(title) {
     const localRes = await getMoviesLocal(title)
 
-    return await onFailure(
-        localRes, 
-        await apply(getMoviesExternal, title, cacheMovies)
-    )
+    if (localRes.success){
+        return localRes
+    } else {
+        return await apply(getMoviesExternal, title, cacheMovies)
+    }
 }
 
 // db test
@@ -184,6 +169,30 @@ app.get('/home', (req, res) => {
 
 app.get('/welcome', (req, res) => {
   res.json({status: 'success', message: 'Welcome!'});
+});
+
+app.get('/test_database', (req, res) => {
+    const testOne = getMovies('Oddity')
+        .then(resultOne => {
+            const testTwo = getMoviesLocal('The Incredibles').
+                then(resultTwo => {
+                    res.json({status: 'success', message: {testOne: resultOne, testTwo: resultTwo}})
+                    }
+                )
+            }
+        )
+});
+
+app.get('/test_query', (req, res) => {
+    const testOne = getMoviesExternal('Stargate')
+        .then(resultOne => {
+            const testTwo = getMovies('Coraline').
+                then(resultTwo => {
+                    res.json({status: 'success', message: {testOne: resultOne, testTwo: resultTwo}})
+                    }
+                )
+            }
+        )
 });
 
 
