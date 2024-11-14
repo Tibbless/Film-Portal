@@ -218,6 +218,7 @@ app.post('/register', async (req, res) => {
     // check if email already exists in the database so we dont get duplicate users
     const existingUser = await db.oneOrNone('SELECT * FROM Client WHERE Email = $1', [Email]);
     if (existingUser) {
+      res.status(400).json({message:"Email in use"});
       return res.render('pages/register', { error: 'Email is already registered' });
     }
 
@@ -228,10 +229,15 @@ app.post('/register', async (req, res) => {
     await db.none(
       'INSERT INTO Client (Username, Password, Email, FirstName, LastName) VALUES ($1, $2, $3, $4, $5)', 
       [Username, hashedPassword, Email, FirstName, LastName]
-    );
+    ).then(data => {
+      res.status(200).json({
+        message:"Success"
+      })
+    });
 
     res.redirect('/login');
   } catch (error) {
+    res.status(400);
     console.error('Error during registration:', error);
     res.render('pages/register', { error: 'An error occurred during registration. Please try again.' });
   }
@@ -270,8 +276,8 @@ app.get('/test_query', (req, res) => {
         )
 });
 
-
 //app.listen(3000);
+
 module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
 
