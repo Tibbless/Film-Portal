@@ -38,3 +38,5 @@ CREATE TABLE Client_friend (
     FriendId INT NOT NULL REFERENCES Client(ClientId) ON DELETE CASCADE,
     CONSTRAINT Client_friend_relation PRIMARY KEY (ClientId, FriendId)
 );
+
+
