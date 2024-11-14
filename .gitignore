@@ -1,0 +1,4 @@
+.env
+ProjectSourceCode/.env
+ProjectSourceCode/node_modules/
+ProjectSourceCode/package-lock.json/

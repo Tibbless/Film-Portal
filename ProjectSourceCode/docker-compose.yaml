@@ -1,0 +1,35 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:14
+    env_file: .env
+    ports:
+      - "5432:5432"  # Maps PostgreSQL port to make it accessible
+    volumes:
+      - new-db-volume:/var/lib/postgresql/data:z
+      - ./src/init_data:/docker-entrypoint-initdb.d:z  # Correct path to initialization SQL files
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      
+  web:
+    image: node:lts
+    user: 'node'
+    working_dir: /home/node/app
+    env_file: .env
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"  # Maps application port to host
+    volumes:
+      # NOTE: to make this work with SELinux,
+      # I need to add the :z at the end
+      - ./:/home/node/app:z
+    command: 'npm run testandrun'
+
+# Persistent volume for database storage
+volumes:
+  new-db-volume:
