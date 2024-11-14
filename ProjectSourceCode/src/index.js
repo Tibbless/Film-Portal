@@ -63,6 +63,12 @@ async function apply(async_fetch, async_param, func) {
 // search query `title`.
 // If not found, return failure
 async function getMoviesLocal(title) {
+    // Due to project requirements,
+    // we have a limited tech stack.
+    // For this reason, we use SQL 'like'
+    // to check user-input title.
+    // However, SQL `like` is *not* a
+    // fuzzy search and is not perfect 
     const query = 
     `select * 
         from movie 
@@ -86,12 +92,16 @@ async function getMoviesExternal(title) {
         params: {
             query: title,
             include_adult: false,
-            language: "en-USA",
+            language: "en-USA", // Limit scope for project
             page: 1, // Limit API calls
             api_key: process.env.API_KEY
         }
     }
-    
+   
+    // Organize the results from TMDB
+    // into a nice JSON structure,
+    // which can then later be cached into
+    // the local database.
     const organizeMovies = (response) => {
         var moviesData = []
 
@@ -119,6 +129,8 @@ async function getMoviesExternal(title) {
 // Cache movies from TMDB into the local database
 async function cacheMovies(response) {
     const moviesData = response.moviesData
+    // Insert results from moviesData
+    // into database
     const query = `
         insert into Movie (MovieTitle, MovieDescription, ReleaseDate, MovieImage)
         Values ($1, $2, $3, $4) 
