@@ -28,7 +28,7 @@ services:
       # NOTE: to make this work with SELinux,
       # I need to add the :z at the end
       - ./:/home/node/app:z
-    command: 'npm testandrun'
+    command: 'npm run testandrun'
 
 # Persistent volume for database storage
 volumes:
