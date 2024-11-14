@@ -5,7 +5,7 @@ CREATE TABLE Client (
     Email VARCHAR(45) NOT NULL,
     FirstName VARCHAR(45),
     LastName VARCHAR(45),
-    UserImage VARCHAR(45)
+    UserImage VARCHAR(255)
 );
 
 CREATE TABLE Movie (
@@ -36,8 +36,7 @@ CREATE TABLE Comment (
 CREATE TABLE Client_friend (
     ClientId INT NOT NULL REFERENCES Client(ClientId) ON UPDATE CASCADE ON DELETE CASCADE,
     FriendId INT NOT NULL REFERENCES Client(ClientId) ON DELETE CASCADE,
-
-    CONSTRAINT Client_friend_relation PRIMARY KEY (ClientId, FriendID)
+    CONSTRAINT Client_friend_relation PRIMARY KEY (ClientId, FriendId)
 );
 
-\dt;
+
