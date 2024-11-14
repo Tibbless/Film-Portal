@@ -47,6 +47,10 @@ const dbConfig = {
 const db = pgp(dbConfig);
 
 
+// Abstracted async pattern that:
+// 1. Gets data from an async function `async_fetch`,
+// which has one parameter `async_param`
+// 2. On success, call the callback `func` with this data. Otherwise, return an object containing `success: false` and the error
 async function apply(async_fetch, async_param, func) {
     try {
         return func(await async_fetch(async_param))
@@ -55,6 +59,9 @@ async function apply(async_fetch, async_param, func) {
     }
 }
 
+// Attempt to find the movie in the local database with
+// search query `title`.
+// If not found, return failure
 async function getMoviesLocal(title) {
     const query = 
     `select * 
@@ -71,6 +78,7 @@ async function getMoviesLocal(title) {
     }
 }
 
+// Get movies from TMDB with search query `title`
 async function getMoviesExternal(title) {
     const tmdb_query = {
         url: `https://api.themoviedb.org/3/search/movie`,
@@ -108,6 +116,7 @@ async function getMoviesExternal(title) {
     return await apply(axios, tmdb_query, organizeMovies)
 }
 
+// Cache movies from TMDB into the local database
 async function cacheMovies(response) {
     const moviesData = response.moviesData
     const query = `
@@ -125,6 +134,11 @@ async function cacheMovies(response) {
     }
 }
 
+// First, try to get movies from the local database
+// (to make retrieval as fast as possible).
+// In case this fails, lookup the external database.
+// To reduce external API calls, cache any results
+// into the database.
 async function getMovies(title) {
     const localRes = await getMoviesLocal(title)
 
@@ -135,17 +149,28 @@ async function getMovies(title) {
     }
 }
 
-// db test
+// Test Database
 db.connect()
   .then(obj => {
-    // Can check the server version here (pg-promise v10.1.0+):
     console.log('Database connection successful');
-    obj.done(); // success, release the connection;
+    obj.done(); 
   })
   .catch(error => {
     console.log('ERROR', error.message || error);
   });
 
+
+// Endpoints
+//
+// Main endpoints:
+// - /login
+// - /register
+// - /home
+//
+// Test Endpoints:
+// - /welcome (required for class)
+// - /test_database
+// - /test_query
 
 app.get('/login', (req, res) => {
   res.render('pages/login');
@@ -195,5 +220,6 @@ app.get('/test_query', (req, res) => {
         )
 });
 
+// Finalize module
 module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
