@@ -1,7 +1,8 @@
 # Film Portal
+
 **CSCI 3308: Recitation 011**
+
 **Team: Movie Buffs**
-  
   
 
 ## Description: Film Portal is a social media site for reviewing movies. Users can search for movies, post their reviews, and comment on reviews. 
@@ -45,20 +46,24 @@
 ## Instructions to Run Locally
 
 
-- 1. In [docker-compose.yaml](ProjectSourceCode/docker-compose.yaml),
+1. In [docker-compose.yaml](ProjectSourceCode/docker-compose.yaml),
 make sure `command` under the `web` service is `'npm start run'`.
 
-- 2. In the root of this project, run:
+2. In the root of this project, run:
+    
     `cd ProjectSourceCode && docker-compose up`.
   
   
 
 ## How to Run Tests
 
-- 1. In [docker-compose.yaml](ProjectSourceCode/docker-compose.yaml),
-change `command` under the `web` service to `'npm start test'`.
+1. In [docker-compose.yaml](ProjectSourceCode/docker-compose.yaml),
+change `command` under the `web` service to: 
 
-- 2. In the root of this project, run:
+    `'npm start test'`.
+
+2. In the root of this project, run:
+    
     `cd ProjectSourceCode && docker-compose up`.
 
 ## Link to Deployed Application:
