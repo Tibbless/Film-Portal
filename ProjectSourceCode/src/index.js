@@ -74,6 +74,11 @@ function hashPassword(password) {
 }
 
 
+// =========================================================================================================
+//      Helper Functions
+// =========================================================================================================
+
+
 async function apply(async_fetch, async_param, func) {
     try {
         return func(await async_fetch(async_param))
@@ -162,6 +167,15 @@ async function getMovies(title) {
     }
 }
 
+
+// =========================================================================================================
+//      Endpoints
+// =========================================================================================================
+
+app.get('/', (req, res) => {
+  res.redirect('/login');
+});
+
 app.get('/login', (req, res) => {
   const error = req.session.error || null;
   req.session.error = null;  // clear error message after passing it to the view
@@ -229,12 +243,8 @@ app.post('/register', async (req, res) => {
     await db.none(
       'INSERT INTO Client (Username, Password, Email, FirstName, LastName) VALUES ($1, $2, $3, $4, $5)', 
       [Username, hashedPassword, Email, FirstName, LastName]
-    ).then(data => {
-      res.status(200).json({
-        message:"Success"
-      })
-    });
-
+    );
+    res.status(200);
     res.redirect('/login');
   } catch (error) {
     res.status(400);
@@ -276,8 +286,28 @@ app.get('/test_query', (req, res) => {
         )
 });
 
-//app.listen(3000);
+app.get('/settings', (req, res) => {
+  res.render('pages/settings');
+})
 
-module.exports = app.listen(3000);
+app.put('updateUsername', (req, res) => {
+  const newUsername = req.body;
+  const username = session.user;
+  const query = "UPDATE Client SET Username = '$1' WHERE Username = '$2';"
+  
+  db.one(query, [newUsername, username]).then(data => {
+    res.status(200).json({
+      message: "Success",
+    })
+  }).catch(error => {
+    console.log(error);
+    res.redirect('/settings');
+  })
+})
+
+
+app.listen(3000);
+
+// module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
 

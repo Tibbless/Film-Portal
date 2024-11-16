@@ -1,0 +1,36 @@
+{{>header}}
+
+<div class="container-md mx-auto">
+    <div class='mb-3'>
+        <form action="/updateUsername" method="PUT">
+            <label for="updateUsername" class="form-label">New Username</label>
+            <input type="text" class="form-control" id="updateUsername" placeholder="Sample1234">
+            <button class="btn btn-secondary" type="submit">Change Username</button>
+        </form>
+    </div>
+
+    <div class='mb-3'>
+        <form action="/updatePassword" method="PUT">
+            <label for="updatePassword" class="form-label">New Password</label>
+            <input type="password" class="form-control" id="updatePassword" placeholder="Password">
+            <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password">
+            <button class="btn btn-secondary" type="submit">Change Password</button>
+        </form>
+    </div>
+
+    <div class='mb-3'>
+        <form action="/updatePicture" method="PUT">
+            <label for="updatePicture" class="form-label">New Picture</label>
+            <input type="email" class="form-control" id="updatePicture" placeholder="sampletext">
+            <button class="btn btn-secondary" type="submit">Change Profile Picture</button>
+        </form>
+    </div>
+
+    <div class='mb-3'>
+        <form action="/deleteAccount" method="DELETE">
+            <button class="btn btn-danger" type="submit">Delete Account</button>
+        </form>
+    </div>
+</div>
+
+{{>footer}}
