@@ -164,10 +164,11 @@ async function getMovies(title) {
 
 app.get('/login', (req, res) => {
   const error = req.session.error || null;
+  const message = req.session.message || null;
   req.session.error = null;  // clear error message after passing it to the view
+  req.session.message = null;  // clear success message after passing it to the view
 
-  res.render('pages/login', { error });  // pass the error to the view
-
+  res.render('pages/login', { error, message });  // pass error and message to the view
 });
 
 app.post('/login', async (req, res) => {
@@ -203,7 +204,10 @@ app.post('/login', async (req, res) => {
 });
 
 app.get('/register', (req, res) => {
-  res.render('pages/register');
+  const error = req.session.error || null;
+  req.session.error = null;  // clear error message after passing it to the view
+
+  res.render('pages/register', { error });
 });
 
 app.post('/register', async (req, res) => {
@@ -212,14 +216,15 @@ app.post('/register', async (req, res) => {
   try {
     // input validation
     if (!Username || !Password || !Email) {
-      return res.render('pages/register', { error: 'Username, Password, and Email are required' });
+      req.session.error = 'Username, Password, and Email are required';
+      return res.redirect('/register');
     }
 
     // check if email already exists in the database so we dont get duplicate users
     const existingUser = await db.oneOrNone('SELECT * FROM Client WHERE Email = $1', [Email]);
     if (existingUser) {
-      res.status(400).json({message:"Email in use"});
-      return res.render('pages/register', { error: 'Email is already registered' });
+      req.session.error = 'Email is already registered';
+      return res.redirect('/register');
     }
 
     // hashing password
@@ -229,17 +234,15 @@ app.post('/register', async (req, res) => {
     await db.none(
       'INSERT INTO Client (Username, Password, Email, FirstName, LastName) VALUES ($1, $2, $3, $4, $5)', 
       [Username, hashedPassword, Email, FirstName, LastName]
-    ).then(data => {
-      res.status(200).json({
-        message:"Success"
-      })
-    });
+    );
 
+    req.session.message = 'Registration successful! Please log in.';
     res.redirect('/login');
   } catch (error) {
     res.status(400);
     console.error('Error during registration:', error);
-    res.render('pages/register', { error: 'An error occurred during registration. Please try again.' });
+    req.session.error = 'An error occurred during registration. Please try again.';
+    return res.redirect('/register');
   }
 });
 
@@ -247,6 +250,29 @@ app.get('/home', (req, res) => {
 
   res.render('pages/home');
 });
+
+app.get('/search', (req, res) => {
+  const result = req.session.result || null;
+  req.session.result = null;  // clear error message after passing it to the view
+
+  res.render('pages/register', { result });
+});
+
+app.post('/search', async (req, res) => {
+  const { query } = req.query;
+
+  try {
+    const results = await db.any(
+      'SELECT * FROM Review WHERE ReviewBody ILIKE $1',
+      [`%${query}%`]
+    );
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching search results:', error);
+    res.status(500).json({ error: 'Error fetching search results' });
+  }
+});
+
 
 app.get('/welcome', (req, res) => {
   res.json({status: 'success', message: 'Welcome!'});
@@ -276,8 +302,8 @@ app.get('/test_query', (req, res) => {
         )
 });
 
-//app.listen(3000);
+app.listen(3000);
 
-module.exports = app.listen(3000);
+// module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
 
