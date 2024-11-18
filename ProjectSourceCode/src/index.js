@@ -298,9 +298,12 @@ app.post('/settings/updateUsername', (req, res) => {
   const query = "UPDATE Client SET Username = $1 WHERE ClientId = $2;"
   
   db.any(query, [newUsername, userId]).then(data => {
-    res.status(200).json({
-      message: "Successfully changed Username",
-    })
+    // res.status(200).json({
+    //   message: "Successfully changed Username",
+    // })
+    res.render('/pages/settings', {
+      message: "Sucessfully updated username"
+    });
   }).catch(error => {
     console.log(error);
     res.redirect('/settings');
@@ -314,17 +317,17 @@ app.post('/settings/updatePassword', (req, res) => {
   const query = "UPDATE Client SET Password = $1 WHERE ClientId = $2;"
   
   if (newPassword != newPasswordConfirm) {
-    res.status(400).json({
+    res.render('/pages/settings', {
       message: "Passwords do not match"
-    })
+    });
   }
 
   const hashedPassword = hashPassword(newPassword);
 
   db.any(query, [hashedPassword, userId]).then(data => {
-    res.status(200).json({
-      message: "Success",
-    })
+    res.render('/pages/settings', {
+      message: "Sucessfully updated username"
+    });
   }).catch(error => {
     console.log(error);
     res.redirect('/settings');
@@ -339,9 +342,11 @@ app.post('/settings/deleteAccount', (req, res) => {
     const query = "DELETE FROM CLIENT WHERE ClientId = $1 RETURNING *;"
     db.any(query, [userId]).then(data => {
       //console.log(data);
-      res.status(200).json({
-        message: "Successfully deleted account",
-      })
+      // res.status(200).json({
+      //   message: "Successfully deleted account",
+      // })
+      req.session.destroy();
+      res.render('pages/login');
     }).catch(error => {
       console.log(error);
       res.redirect('/settings');
