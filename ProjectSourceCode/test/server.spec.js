@@ -8,25 +8,38 @@ const chai = require('chai'); // Chai HTTP provides an interface for live integr
 const chaiHttp = require('chai-http');
 chai.should();
 chai.use(chaiHttp);
-const {assert, expect} = chai;
+const { assert, expect } = chai;
 console.log("serverspec test running");
 // ********************** DEFAULT WELCOME TESTCASE ****************************
 
 describe('Server!', () => {
-  // Sample test case given to test / endpoint.
-  it('Returns the default welcome message', done => {
-    chai
-      .request(server)
-      .get('/welcome')
-      .end((err, res) => {
-        expect(res).to.have.status(200);
-        expect(res.body.status).to.equals('success');
-        assert.strictEqual(res.body.message, 'Welcome!');
-        done();
-      });
-  });
+    // Sample test case given to test / endpoint.
+    it('Returns the default welcome message', done => {
+        chai
+            .request(server)
+            .get('/welcome')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body.status).to.equals('success');
+                assert.strictEqual(res.body.message, 'Welcome!');
+                done();
+            });
+    });
 });
 
 // *********************** TODO: WRITE 2 UNIT TESTCASES **************************
+
+describe('Database', () => {
+    it('Returns a simple query', done => {
+        chai.request(server)
+            .get('/db-test1')
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body.status).to.equals('success');
+                assert.strictEqual(res.body.data.username, 'Eskam');
+                done();
+            });
+    });
+});
 
 // ********************************************************************************
