@@ -162,6 +162,10 @@ async function getMovies(title) {
     }
 }
 
+app.get('/', (req, res) => {
+    res.redirect('pages/login');
+})
+
 app.get('/login', (req, res) => {
   const error = req.session.error || null;
   req.session.error = null;  // clear error message after passing it to the view
@@ -244,9 +248,42 @@ app.post('/register', async (req, res) => {
 });
 
 app.get('/home', (req, res) => {
-
   res.render('pages/home');
 });
+
+app.get('/create-post', (req, res) => {
+    res.render('pages/create-post')
+})
+
+app.post('/create-post', async (req, res) => {
+    const tilte = req.body.title
+    // TODO(Oscar): link this movie to the database
+    //const movie = req.body.movie
+
+    //const movie_rating = req.body.movie_rating
+    //console.log(movie_rating)
+    //const review_rating = req.body.review_rating
+    //const movie_rating = 1
+    //const review_rating = 2
+    //const body = req.body.body
+    //const client_id = 0
+    //const movie_id = 0
+    //
+    //const query = " insert into Review (ReviewBody, MovieRating, ReviewRating, ClientId, MovieId) values ($1, $2, $3, $4, $5) returning *;"
+    //
+    //const inputs = [body, movie_rating, review_rating, client_id, movie_id]
+    //
+    //db.any(query, inputs)
+    //    .then(function (data) {
+    //        res.render('pages/home', { message: 'Created post!'})
+    //    })
+    //    .catch(function (err) {
+    //        res.render('pages/create-post', {
+    //            message: 'Error creating post. Please try again.'
+    //        })
+    //    });
+    res.redirect('/home');
+})
 
 app.get('/welcome', (req, res) => {
   res.json({status: 'success', message: 'Welcome!'});
@@ -276,8 +313,5 @@ app.get('/test_query', (req, res) => {
         )
 });
 
-//app.listen(3000);
-
 module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
-
