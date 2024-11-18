@@ -206,9 +206,11 @@ app.post('/login', async (req, res) => {
     }
 
     // set session user ID on successful login
-    req.session.userId = user.ClientId;
+    
+    req.session.userId = user.clientid;
     req.session.error = null;  // clear error after successful login
-    res.redirect('/home');
+    res.redirect('/settings');
+    //res.redirect('/home');
   } catch (error) {
     console.error('Error during login:', error);
     req.session.error = 'An error occurred during login. Please try again.';
@@ -290,29 +292,36 @@ app.get('/settings', (req, res) => {
   res.render('pages/settings');
 })
 
-app.put('updateUsername', (req, res) => {
-  const newUsername = req.body;
-  const userId = req.session.user.userId;
-  const query = "UPDATE Client SET Username = '$1' WHERE ClientId = $2;"
+app.post('/settings/updateUsername', (req, res) => {
+  const newUsername = req.body.username;
+  const userId = req.session.userId;
+  const query = "UPDATE Client SET Username = $1 WHERE ClientId = $2;"
   
-  db.one(query, [newUsername, userId]).then(data => {
+  db.any(query, [newUsername, userId]).then(data => {
     res.status(200).json({
-      message: "Success",
+      message: "Successfully changed Username",
     })
   }).catch(error => {
     console.log(error);
     res.redirect('/settings');
-  })
-})
+  });
+});
 
-app.put('updatePassword', (req, res) => {
-  const newPassword = req.body;
-  const userId = req.session.user.userId;
-  const query = "UPDATE Client SET Password = '$1' WHERE ClientId = $2;"
+app.post('/settings/updatePassword', (req, res) => {
+  const newPassword = req.body.password;
+  const newPasswordConfirm = req.body.password_confirm;
+  const userId = req.session.userId;
+  const query = "UPDATE Client SET Password = $1 WHERE ClientId = $2;"
   
+  if (newPassword != newPasswordConfirm) {
+    res.status(400).json({
+      message: "Passwords do not match"
+    })
+  }
+
   const hashedPassword = hashPassword(newPassword);
 
-  db.one(query, [hashedPassword, userId]).then(data => {
+  db.any(query, [hashedPassword, userId]).then(data => {
     res.status(200).json({
       message: "Success",
     })
@@ -322,13 +331,14 @@ app.put('updatePassword', (req, res) => {
   })
 })
 
-app.delete('deleteAccount', (req, res) => {
-  let deleteConfirm = window.confirm("Are you sure you want to delete your account?");
+app.post('/settings/deleteAccount', (req, res) => {
+  //let deleteConfirm = confirm("Are you sure you want to delete your account?");
 
-  if (deleteConfirm) {
-    const userId = req.session.user.userId;
-    const query = "DELETE FROM CLIENT WHERE ClientId = $1;"
-    db.one(query, [userId]).then(data => {
+  // if (deleteConfirm) {
+    const userId = req.session.userId;
+    const query = "DELETE FROM CLIENT WHERE ClientId = $1 RETURNING *;"
+    db.any(query, [userId]).then(data => {
+      //console.log(data);
       res.status(200).json({
         message: "Successfully deleted account",
       })
@@ -337,9 +347,9 @@ app.delete('deleteAccount', (req, res) => {
       res.redirect('/settings');
     })
   
-  } else {
-    res.redirect('/settings');
-  }
+  // } else {
+  //   res.redirect('/settings');
+  // }
 })
 
 
