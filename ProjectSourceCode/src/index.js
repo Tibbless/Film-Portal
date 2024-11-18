@@ -292,10 +292,10 @@ app.get('/settings', (req, res) => {
 
 app.put('updateUsername', (req, res) => {
   const newUsername = req.body;
-  const username = session.user;
-  const query = "UPDATE Client SET Username = '$1' WHERE Username = '$2';"
+  const userId = req.session.user.userId;
+  const query = "UPDATE Client SET Username = '$1' WHERE ClientId = $2;"
   
-  db.one(query, [newUsername, username]).then(data => {
+  db.one(query, [newUsername, userId]).then(data => {
     res.status(200).json({
       message: "Success",
     })
@@ -303,6 +303,43 @@ app.put('updateUsername', (req, res) => {
     console.log(error);
     res.redirect('/settings');
   })
+})
+
+app.put('updatePassword', (req, res) => {
+  const newPassword = req.body;
+  const userId = req.session.user.userId;
+  const query = "UPDATE Client SET Password = '$1' WHERE ClientId = $2;"
+  
+  const hashedPassword = hashPassword(newPassword);
+
+  db.one(query, [hashedPassword, userId]).then(data => {
+    res.status(200).json({
+      message: "Success",
+    })
+  }).catch(error => {
+    console.log(error);
+    res.redirect('/settings');
+  })
+})
+
+app.delete('deleteAccount', (req, res) => {
+  let deleteConfirm = window.confirm("Are you sure you want to delete your account?");
+
+  if (deleteConfirm) {
+    const userId = req.session.user.userId;
+    const query = "DELETE FROM CLIENT WHERE ClientId = $1;"
+    db.one(query, [userId]).then(data => {
+      res.status(200).json({
+        message: "Successfully deleted account",
+      })
+    }).catch(error => {
+      console.log(error);
+      res.redirect('/settings');
+    })
+  
+  } else {
+    res.redirect('/settings');
+  }
 })
 
 
