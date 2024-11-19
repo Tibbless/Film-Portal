@@ -35,11 +35,20 @@ app.use(
     }
   })
 );
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-);
+
+// app.use(
+//   bodyParser.urlencoded({
+//     extended: true,
+//   })
+// );
+
+app.use(bodyParser.urlencoded({
+  parameterLimit: 100000,
+  limit: 52428800,
+  extended: true
+}));
+app.use(express.json({limit : 52428800}));
+// app.use(express.urlencoded({extended: true, limit:52428800}));
 
 // -------------------------------------  DB CONFIG AND CONNECT   ---------------------------------------
 const dbConfig = {
@@ -337,6 +346,46 @@ app.post('/settings/updatePassword', (req, res) => {
     console.log(error);
     res.redirect('/settings');
   })
+})
+
+app.post('/settings/updatePicture', (req, res) => {
+  const newPicture = req.body.newPicture;
+  if (newPicture) {
+
+  const selectQuery = "SELECT imageid FROM Client_images WHERE ClientID = $1;";
+
+  db.any(selectQuery, [req.session.userId]).then( data => {
+    if (data.imageid) {
+      const updateQuery = "UPDATE Client_images SET ClientImage = $1 WHERE InageId = $2;";
+      db.any(updateQuery, [newPicture, data.imageid]).then( () => {
+        res.render('pages/settings', {
+          message: "Picture succssfully updated"
+        });
+    }).catch(error => {
+      console.log(error);
+      res.redirect("/settings");
+    });
+    }
+    else {
+      const insertQuery = "INSERT INTO Client_images (ClientImage, ClientId) VALUES ($1, $2);";
+
+      db.any(insertQuery, [newPicture, req.session.userId]).then( data => {
+        res.render("pages/settings", {
+          message: "Sucessfully updated picture"
+        });
+    }).catch(error => {
+      console.log(error)
+      res.redirect("/settings");
+    });
+    }
+  });
+  }
+  else {
+    console.log("Unable to get image")
+    res.render("pages/settings", {
+      message: "Unable to update image"
+    });
+  }
 })
 
 app.post('/settings/deleteAccount', (req, res) => {

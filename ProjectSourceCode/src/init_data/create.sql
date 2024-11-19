@@ -4,8 +4,7 @@ CREATE TABLE Client (
     Password VARCHAR(300) NOT NULL,
     Email VARCHAR(45) NOT NULL UNIQUE,
     FirstName VARCHAR(45),
-    LastName VARCHAR(45),
-    UserImage VARCHAR(255)
+    LastName VARCHAR(45)
 );
 
 CREATE TABLE Movie (
@@ -38,5 +37,12 @@ CREATE TABLE Client_friend (
     FriendId INT NOT NULL REFERENCES Client(ClientId) ON DELETE CASCADE,
     CONSTRAINT Client_friend_relation PRIMARY KEY (ClientId, FriendId)
 );
+
+
+CREATE TABLE Client_images (
+    ImageId SERIAL PRIMARY KEY,
+    ClientImage TEXT NOT NULL,
+    ClientId INT NOT NULL REFERENCES Client(ClientId) ON DELETE CASCADE
+)
 
 
