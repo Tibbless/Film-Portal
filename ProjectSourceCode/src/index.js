@@ -289,6 +289,9 @@ app.get('/test_query', (req, res) => {
 });
 
 app.get('/settings', (req, res) => {
+  console.log("\n\n\n====================");
+  console.log(req.body);
+  console.log("\n\n\n");
   res.render('pages/settings');
 })
 
@@ -298,12 +301,14 @@ app.post('/settings/updateUsername', (req, res) => {
   const query = "UPDATE Client SET Username = $1 WHERE ClientId = $2;"
   
   db.any(query, [newUsername, userId]).then(data => {
-    // res.status(200).json({
-    //   message: "Successfully changed Username",
-    // })
-    res.render('/pages/settings', {
-      message: "Sucessfully updated username"
+    res.render('pages/settings', {
+      message: "Successfully updated username"
     });
+    // res.redirect('/settings',
+    // {
+    //   status: 200,
+    //   message: "Sucessfully updated username"
+    // });
   }).catch(error => {
     console.log(error);
     res.redirect('/settings');
@@ -317,7 +322,7 @@ app.post('/settings/updatePassword', (req, res) => {
   const query = "UPDATE Client SET Password = $1 WHERE ClientId = $2;"
   
   if (newPassword != newPasswordConfirm) {
-    res.render('/pages/settings', {
+    res.render('pages/settings', {
       message: "Passwords do not match"
     });
   }
@@ -325,8 +330,8 @@ app.post('/settings/updatePassword', (req, res) => {
   const hashedPassword = hashPassword(newPassword);
 
   db.any(query, [hashedPassword, userId]).then(data => {
-    res.render('/pages/settings', {
-      message: "Sucessfully updated username"
+    res.render('pages/settings', {
+      message: "Successfully updated password"
     });
   }).catch(error => {
     console.log(error);
@@ -346,7 +351,9 @@ app.post('/settings/deleteAccount', (req, res) => {
       //   message: "Successfully deleted account",
       // })
       req.session.destroy();
-      res.render('pages/login');
+      res.render('pages/login', {
+        message: "Account Deleted"
+      });
     }).catch(error => {
       console.log(error);
       res.redirect('/settings');
