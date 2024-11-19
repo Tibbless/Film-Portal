@@ -1,3 +1,12 @@
+Project meeting 11/18/2024
+- Ready to be finished by EC deadline
+- search almost ready
+- profile almost ready
+- create new review ready
+- settings page ready
+- 9:30 DEC 5th presentation
+
+
 Project meeting 11/11/2024
 - Got database, login, and registration working
 - Templates for home page are ready
