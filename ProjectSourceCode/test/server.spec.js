@@ -1,6 +1,6 @@
 // ********************** Initialize server **********************************
 
-const server = require('../src/index.js'); //TODO: Make sure the path to your index.js is correctly added
+const server = require('../src/index.js');
 
 // ********************** Import Libraries ***********************************
 
@@ -37,6 +37,32 @@ describe('Database', () => {
                 expect(res).to.have.status(200);
                 expect(res.body.status).to.equals('success');
                 assert.strictEqual(res.body.data.username, 'Eskam');
+                done();
+            });
+    });
+});
+describe('Register pass', () => {
+    it('Create a new account with register page', done => {
+        chai.request(server)
+            .post('/register')
+            .send({ Username: "test-name", Password: "password123", Email: "email@email.com" })
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect(res.body.message).to.equals('Success');
+                done();
+            });
+    });
+});
+
+describe('Register fail', () => {
+    it('Create an account with an already used email', done => {
+        chai.request(server)
+            .post('/register')
+            .send({ Username: "ESkam", Password: "password123", Email: "email@email.com" })
+            .end((err, res) => {
+                console.log(res.body);
+                expect(res).to.have.status(400);
+                //expect(res.body.message).to.equals('Email in use');
                 done();
             });
     });

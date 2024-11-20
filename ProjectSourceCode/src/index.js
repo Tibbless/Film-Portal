@@ -246,8 +246,32 @@ app.post('/register', async (req, res) => {
         console.error('Error during registration:', error);
         res.render('pages/register', { error: 'An error occurred during registration. Please try again.' });
     }
-});
 
+    // check if email already exists in the database so we dont get duplicate users
+    const existingUser = await db.oneOrNone('SELECT * FROM Client WHERE Email = $1', [Email]);
+    if (existingUser) {
+        res.status(400).json({ message: "Email in use" });
+        return res.render('pages/register', { error: 'Email is already registered' });
+    }
+
+    // hashing password
+    const hashedPassword = hashPassword(Password);
+
+    // insert user into db
+    await db.none(
+        'INSERT INTO Client (Username, Password, Email, FirstName, LastName) VALUES ($1, $2, $3, $4, $5)',
+        [Username, hashedPassword, Email, FirstName, LastName]
+    ).then(data => {
+        res.status(200).json({
+            message: "Success"
+        })
+    });
+
+    res.redirect('/login');
+} catch (error) {
+    console.error('Error during registration:', error);
+    res.render('pages/register', { error: 'An error occurred during registration. Please try again.' });
+}
 app.get('/home', (req, res) => {
     res.render('pages/home');
 });
@@ -323,5 +347,24 @@ app.get('/db-test1', (req, res) => {
     })
 })
 
+app.get('/welcome', (req, res) => {
+    res.json({ status: 'success', message: 'Welcome!' });
+});
+
+
+// app.get('/db-test1', async (req, res) => {
+//   await db.any(
+//     'INSERT INTO Client (username, password, email) VALUES ("abcd", "non-password", "email@email.com");'
+//   );
+
+//   await db.any(
+//     'SELECT * FROM Client WHERE username = "abcd";'
+//   ).then(data => {
+//     let username = data.username;
+//     res.redirect('/register');
+//   })
+// })
+
+// app.listen(3000);
 module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
