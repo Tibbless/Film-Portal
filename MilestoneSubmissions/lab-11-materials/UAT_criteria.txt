@@ -1,0 +1,42 @@
+Steps for testing user acceptance criteria
+
+For User acceptance criteria, we will be testing three workflows.
+1. Account registration
+2. Login workflows
+3. Review creation
+
+
+Begin by giving a description of the purpose of the website:
+    It is like a social media for people who like watching films
+    and want to see what films their friends are watching, and what
+    they thought about the films.
+
+
+
+For each step, ask if they had any trouble finding anything or if
+    there was somewhere they expected something to be, but it was
+    not there.
+
+
+1. For account registration, navigate to the registration page,
+    then ask the user to create an account. The content of the 
+    data is not important, we want to make sure it is clear what
+    needs to happen
+
+2. After account registration, ask the user to log in. They should
+    have been redirected to the login page after registration, but
+    if not, watch to see how they navigate to that page.
+
+3. After they have sucessfully logged in, ask them to create a Review
+    for a movie they enjoy or have watched recently. Try to get them
+    to use a real movie, but the body of the review data is not important
+    if they cannot think of a movie, suggest something simple, like Cars
+    or Terminator
+
+
+At the end ask for possible feedback with the flow of the page and
+    where they might move buttons/layout of the page to allow for
+    ease of access.
+
+    
+

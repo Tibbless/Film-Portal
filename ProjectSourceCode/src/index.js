@@ -245,6 +245,7 @@ app.post('/register', async (req, res) => {
         res.status(400);
         console.error('Error during registration:', error);
         res.render('pages/register', { error: 'An error occurred during registration. Please try again.' });
+
     }
 
     // check if email already exists in the database so we dont get duplicate users
@@ -266,12 +267,8 @@ app.post('/register', async (req, res) => {
             message: "Success"
         })
     });
+});
 
-    res.redirect('/login');
-} catch (error) {
-    console.error('Error during registration:', error);
-    res.render('pages/register', { error: 'An error occurred during registration. Please try again.' });
-}
 app.get('/home', (req, res) => {
     res.render('pages/home');
 });
