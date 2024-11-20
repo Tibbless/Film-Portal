@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // ----------------------------------   DEPENDENCIES  ----------------------------------------------
 const express = require('express');
 const app = express();
@@ -104,11 +105,24 @@ async function getMoviesExternal(title) {
         method: `GET`,
         params: {
             query: title,
+=======
+const axios = require('axios');
+
+function getMovies(query) {
+    var moviesData = []
+
+    axios({
+        url: `https://api.themoviedb.org/3/search/movie`,
+        method: `GET`,
+        params: {
+            query: query,
+>>>>>>> b6bcf40 (Added external API call to TMDB)
             include_adult: false,
             language: "en-USA",
             page: 1, // Limit API calls
             api_key: process.env.API_KEY
         }
+<<<<<<< HEAD
     }
 
     const organizeMovies = (response) => {
@@ -365,3 +379,23 @@ app.get('/welcome', (req, res) => {
 // app.listen(3000);
 module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
+=======
+    }).then(res => res.data.results.forEach((result) => {
+        var image = null
+
+        if (result.poster_path) {
+            image = `https://image.tmdb.org/t/p/original/${result.poster_path}`
+        }
+
+        moviesData[moviesData.length] = {
+            title: result.title,
+            release_date: result.release_date,
+            description: result.overview,
+            image: image
+        }
+
+        return moviesData
+    }))
+      .catch(error => console.log(error))
+}
+>>>>>>> b6bcf40 (Added external API call to TMDB)
