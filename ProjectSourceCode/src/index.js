@@ -162,6 +162,10 @@ async function getMovies(title) {
     }
 }
 
+app.get('/', (req, res) => {
+    redirect('/login')
+})
+
 app.get('/login', (req, res) => {
   const error = req.session.error || null;
   req.session.error = null;  // clear error message after passing it to the view
