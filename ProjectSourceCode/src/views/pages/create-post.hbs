@@ -1,0 +1,22 @@
+<h1>Create Post</h1>
+<form method="post" action="/create-post">
+    <div class="mb-3">
+        <label for="text" class="form-label">Title</label>
+        <input type="text" class="form-control" id="title" minlength = "0" required/>
+    </div>
+    <div class ="mb-3">
+        <label for="text" class="form-label">Movie</label>
+        <input type="text" class="form-control" id="movie" minlength="0" required/>
+    </div>
+    <div class="mb-3">
+        <label for="text" class="form-label">Movie Rating</label>
+        <input type="number" class="form-control" name="movie_rating" min="1", max="10" required/>
+    </div>
+    <div class="mb-3">
+        <label for="text" class="form-label">Body</label>
+        <input type="textarea" class="form-control" name="body" minlength="0" required />
+        </div>
+    <div class="mb-3">
+        <input type="submit" class="btn btn-primary" value="Post" />
+    </div>
+</form>
