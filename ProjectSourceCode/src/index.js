@@ -35,11 +35,20 @@ app.use(
     }
   })
 );
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-);
+
+// app.use(
+//   bodyParser.urlencoded({
+//     extended: true,
+//   })
+// );
+
+app.use(bodyParser.urlencoded({
+  parameterLimit: 100000,
+  limit: 52428800,
+  extended: true
+}));
+app.use(express.json({limit : 52428800}));
+// app.use(express.urlencoded({extended: true, limit:52428800}));
 
 // -------------------------------------  DB CONFIG AND CONNECT   ---------------------------------------
 const dbConfig = {
@@ -72,6 +81,11 @@ function hashPassword(password) {
     .update(password)
     .digest('hex');
 }
+
+
+// =========================================================================================================
+//      Helper Functions
+// =========================================================================================================
 
 
 async function apply(async_fetch, async_param, func) {
@@ -162,9 +176,15 @@ async function getMovies(title) {
     }
 }
 
+
+// =========================================================================================================
+//      Endpoints
+// =========================================================================================================
+
 app.get('/', (req, res) => {
-    res.redirect('/login')
-})
+  res.redirect('/login');
+});
+
 
 app.get('/login', (req, res) => {
   const error = req.session.error || null;
@@ -196,9 +216,11 @@ app.post('/login', async (req, res) => {
     }
 
     // set session user ID on successful login
-    req.session.userId = user.ClientId;
+    
+    req.session.userId = user.clientid;
     req.session.error = null;  // clear error after successful login
-    res.redirect('/home');
+    res.redirect('/settings');
+    //res.redirect('/home');
   } catch (error) {
     console.error('Error during login:', error);
     req.session.error = 'An error occurred during login. Please try again.';
@@ -233,12 +255,10 @@ app.post('/register', async (req, res) => {
     await db.none(
       'INSERT INTO Client (Username, Password, Email, FirstName, LastName) VALUES ($1, $2, $3, $4, $5)', 
       [Username, hashedPassword, Email, FirstName, LastName]
-    ).then(data => {
-      res.status(200).json({
-        message:"Success"
-      })
-        res.redirect('/login');
-    });
+
+    );
+    res.status(200);
+    res.redirect('/login');
 
   } catch (error) {
     res.status(400);
@@ -319,8 +339,125 @@ app.get('/test_query', (req, res) => {
         )
 });
 
-//app.listen(3000);
+app.get('/settings', (req, res) => {
+  console.log("\n\n\n====================");
+  console.log(req.body);
+  console.log("\n\n\n");
+  res.render('pages/settings');
+})
 
-module.exports = app.listen(3000);
+app.post('/settings/updateUsername', (req, res) => {
+  const newUsername = req.body.username;
+  const userId = req.session.userId;
+  const query = "UPDATE Client SET Username = $1 WHERE ClientId = $2;"
+  
+  db.any(query, [newUsername, userId]).then(data => {
+    res.render('pages/settings', {
+      message: "Successfully updated username"
+    });
+    // res.redirect('/settings',
+    // {
+    //   status: 200,
+    //   message: "Sucessfully updated username"
+    // });
+  }).catch(error => {
+    console.log(error);
+    res.redirect('/settings');
+  });
+});
+
+app.post('/settings/updatePassword', (req, res) => {
+  const newPassword = req.body.password;
+  const newPasswordConfirm = req.body.password_confirm;
+  const userId = req.session.userId;
+  const query = "UPDATE Client SET Password = $1 WHERE ClientId = $2;"
+  
+  if (newPassword != newPasswordConfirm) {
+    res.render('pages/settings', {
+      message: "Passwords do not match"
+    });
+  }
+
+  const hashedPassword = hashPassword(newPassword);
+
+  db.any(query, [hashedPassword, userId]).then(data => {
+    res.render('pages/settings', {
+      message: "Successfully updated password"
+    });
+  }).catch(error => {
+    console.log(error);
+    res.redirect('/settings');
+  })
+})
+
+app.post('/settings/updatePicture', (req, res) => {
+  const newPicture = req.body.newPicture;
+  if (newPicture) {
+
+  const selectQuery = "SELECT imageid FROM Client_images WHERE ClientID = $1;";
+
+  db.any(selectQuery, [req.session.userId]).then( data => {
+    if (data.imageid) {
+      const updateQuery = "UPDATE Client_images SET ClientImage = $1 WHERE InageId = $2;";
+      db.any(updateQuery, [newPicture, data.imageid]).then( () => {
+        res.render('pages/settings', {
+          message: "Picture succssfully updated"
+        });
+    }).catch(error => {
+      console.log(error);
+      res.redirect("/settings");
+    });
+    }
+    else {
+      const insertQuery = "INSERT INTO Client_images (ClientImage, ClientId) VALUES ($1, $2);";
+
+      db.any(insertQuery, [newPicture, req.session.userId]).then( data => {
+        res.render("pages/settings", {
+          message: "Sucessfully updated picture"
+        });
+    }).catch(error => {
+      console.log(error)
+      res.redirect("/settings");
+    });
+    }
+  });
+  }
+  else {
+    console.log("Unable to get image")
+    res.render("pages/settings", {
+      message: "Unable to update image"
+    });
+  }
+})
+
+app.post('/settings/deleteAccount', (req, res) => {
+  //let deleteConfirm = confirm("Are you sure you want to delete your account?");
+
+  // if (deleteConfirm) {
+    const userId = req.session.userId;
+    const query = "DELETE FROM CLIENT WHERE ClientId = $1 RETURNING *;"
+    db.any(query, [userId]).then(data => {
+      //console.log(data);
+      // res.status(200).json({
+      //   message: "Successfully deleted account",
+      // })
+      req.session.destroy();
+      res.render('pages/login', {
+        message: "Account Deleted"
+      });
+    }).catch(error => {
+      console.log(error);
+      res.redirect('/settings');
+    })
+  
+  // } else {
+  //   res.redirect('/settings');
+  // }
+})
+
+
+app.listen(3000);
+
+// module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
 
