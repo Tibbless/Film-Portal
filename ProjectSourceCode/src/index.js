@@ -52,7 +52,7 @@ app.use(express.json({limit : 52428800}));
 
 // -------------------------------------  DB CONFIG AND CONNECT   ---------------------------------------
 const dbConfig = {
-  host: 'db',
+  host: process.env.POSTGRES_HOST,
   port: 5432,
   database: process.env.POSTGRES_DB,
   user: process.env.POSTGRES_USER,
@@ -185,6 +185,7 @@ app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
+
 app.get('/login', (req, res) => {
   const error = req.session.error || null;
   req.session.error = null;  // clear error message after passing it to the view
@@ -254,9 +255,11 @@ app.post('/register', async (req, res) => {
     await db.none(
       'INSERT INTO Client (Username, Password, Email, FirstName, LastName) VALUES ($1, $2, $3, $4, $5)', 
       [Username, hashedPassword, Email, FirstName, LastName]
+
     );
     res.status(200);
     res.redirect('/login');
+
   } catch (error) {
     res.status(400);
     console.error('Error during registration:', error);
@@ -265,9 +268,48 @@ app.post('/register', async (req, res) => {
 });
 
 app.get('/home', (req, res) => {
-
   res.render('pages/home');
 });
+
+app.get('/create-post', (req, res) => {
+    res.render('pages/create-post')
+})
+
+app.post('/create-post', (req, res) => {
+    const title = req.body.title
+    const movie = req.body.movie
+    //getMovies(movie)
+    const movie_query = "select MovieId from Movie where MovieTitle like $1 limit 1;"
+    
+    db.any(movie_query, [movie])
+        .then(function (movie_id) {
+            console.log(movie_id)
+            const movie_rating = req.body.movie_rating
+
+            const review_rating = 0
+            const client_id = req.session.userId
+            const body = req.body.body
+
+            const query = "insert into Review (ReviewBody, MovieRating, ReviewRating, ClientId, MovieId) values ($1, $2, $3, $4, $5) returning *;"
+
+            const inputs = [body, movie_rating, review_rating, client_id, movie_id]
+
+            db.any(query, inputs)
+                .then(function (data) {
+                    res.render('pages/home', { message: 'Created post!'})
+                })
+                .catch(function (err) {
+                    res.render('pages/create-post', {
+                        message: 'Error creating post. Please try again.'
+                    })
+                });
+        })
+        .catch(function (err) {
+            res.render('pages/create-post', {
+                message: 'Error creating post. Please try again.'
+            })
+        });
+})
 
 app.get('/welcome', (req, res) => {
   res.json({status: 'success', message: 'Welcome!'});
