@@ -1,0 +1,23 @@
+<div>
+  {{#if error}}
+    <p class="error">{{error}}</p>
+  {{/if}}
+
+  {{#if results}}
+    <h2>Search Results:</h2>
+    <ul>
+      {{#each results}}
+        <li>
+          <strong>Movie Title:</strong> {{this.MovieTitle}} <br>
+          <strong>Author:</strong> {{this.Author}} <br>
+          <strong>Review:</strong> {{this.ReviewBody}}
+        </li>
+        <hr>
+      {{/each}}
+    </ul>
+  {{else}}
+    <p>No results found.</p>
+  {{/if}}
+
+  <a href="/search">Back to Search</a>
+</div>

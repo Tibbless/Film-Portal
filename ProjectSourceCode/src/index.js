@@ -252,27 +252,89 @@ app.get('/home', (req, res) => {
 });
 
 app.get('/search', (req, res) => {
-  const result = req.session.result || null;
-  req.session.result = null;  // clear error message after passing it to the view
+  const error = req.session.error || null; // get error message, if no error message then dont display error
+  req.session.error = null; // clear the error message after retrieving it
 
-  res.render('pages/register', { result });
+  res.render('pages/search', { error }); // render the search page with error message
 });
 
+
 app.post('/search', async (req, res) => {
-  const { query } = req.query;
+  const { searchType, query } = req.body;
+
+  // validate user input
+  if (!query || !searchType) {
+    req.session.error = 'Search type and query are required.';
+    return res.redirect('/search');
+  }
 
   try {
-    const results = await db.any(
-      'SELECT * FROM Review WHERE ReviewBody ILIKE $1',
-      [`%${query}%`]
-    );
-    res.json(results);
+    let results = [];
+
+    if (searchType === 'byUser') {
+      // search for reviews by a specific user
+      results = await db.any(
+        `SELECT r.ReviewId, m.MovieTitle, c.Username AS Author, r.ReviewBody
+         FROM Review r
+         JOIN Client c ON r.ClientId = c.ClientId
+         JOIN Movie m ON r.MovieId = m.MovieId
+         WHERE c.Username ILIKE $1
+         ORDER BY r.ReviewId ASC`,
+        [`%${query}%`]
+      );
+    } else if (searchType === 'byMovie') {
+      // search for revews of a specific movie
+      results = await db.any(
+        `SELECT r.ReviewId, m.MovieTitle, c.Username AS Author, r.ReviewBody
+         FROM Review r
+         JOIN Client c ON r.ClientId = c.ClientId
+         JOIN Movie m ON r.MovieId = m.MovieId
+         WHERE m.MovieTitle ILIKE $1
+         ORDER BY r.ReviewId ASC`,
+        [`%${query}%`]
+      );
+    } else if (searchType === 'byBody') {
+      // search for reviews contaiining specific text
+      results = await db.any(
+        `SELECT r.ReviewId, m.MovieTitle, c.Username AS Author, r.ReviewBody
+         FROM Review r
+         JOIN Client c ON r.ClientId = c.ClientId
+         JOIN Movie m ON r.MovieId = m.MovieId
+         WHERE r.ReviewBody ILIKE $1
+         ORDER BY r.ReviewId ASC`,
+        [`%${query}%`]
+      );
+    } else {
+      req.session.error = 'Invalid search type.';
+      return res.redirect('/search');
+    }
+
+    // if no results are found send error
+    if (results.length === 0) {
+      req.session.error = 'No results found.';
+      return res.redirect('/search');
+    }
+
+    // store the results in the session and redirect to results page
+    req.session.results = results;
+    req.session.error = null; // clear any previous errors
+    res.redirect('/results');
   } catch (error) {
-    console.error('Error fetching search results:', error);
-    res.status(500).json({ error: 'Error fetching search results' });
+    console.error('Error during search:', error);
+    req.session.error = 'An error occurred during the search. Please try again.';
+    res.redirect('/search');
   }
 });
 
+app.get('/results', (req, res) => {
+  const error = req.session.error || null;
+  const results = req.session.results || null;
+
+  req.session.error = null; // clear the error
+  req.session.results = null; // clear the results
+
+  res.render('pages/results', { error, results }); // pass data to the view
+});
 
 app.get('/welcome', (req, res) => {
   res.json({status: 'success', message: 'Welcome!'});

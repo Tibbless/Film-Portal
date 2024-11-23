@@ -1,0 +1,16 @@
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+  {{#if error}}
+    <p class="error">{{error}}</p>
+  {{/if}}
+
+  <form action="/search" method="POST">
+    <label for="searchType">Search By:</label>
+    <select name="searchType" id="searchType">
+      <option value="byUser">User</option>
+      <option value="byMovie">Movie</option>
+      <option value="byBody">Review Body</option>
+    </select>
+    <input type="text" name="query" placeholder="Enter search query" required />
+    <button type="submit">Search</button>
+  </form>
+</div>
