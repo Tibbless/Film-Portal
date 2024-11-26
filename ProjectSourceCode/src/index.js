@@ -6,7 +6,7 @@ const path = require('path');
 const pgp = require('pg-promise')();
 const bodyParser = require('body-parser');
 const session = require('express-session');
-const axios = require('axios')
+const axios = require('axios');
 
 // -------------------------------------  APP CONFIG   ----------------------------------------------
 
@@ -71,6 +71,24 @@ db.connect()
     console.log('ERROR', error.message || error);
   });
 
+function getMovies(title) {
+    const localMoviesData = getMoviesLocal(title)
+
+    if (!localMoviesData) {
+        getMoviesExternal(title)
+    } else {
+        return localMoviesData
+    }
+}
+
+function getMoviesLocal(title) {
+    const query = `select * from Movies where MoviesTitle like $1`
+    const values = [title]
+
+    db.one(query, values)
+      .then(data => { console.log(data) })
+      .catch(error => { console.log(error) })
+}
 
 // hashing stuff
 const crypto = require('crypto');
@@ -458,6 +476,6 @@ app.post('/settings/deleteAccount', (req, res) => {
 
 app.listen(3000);
 
-// module.exports = app.listen(3000);
+//module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
 
