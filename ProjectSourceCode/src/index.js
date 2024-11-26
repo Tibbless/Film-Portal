@@ -296,12 +296,12 @@ app.get('/create-post', (req, res) => {
 app.post('/create-post', (req, res) => {
     const title = req.body.title
     const movie = req.body.movie
-    //getMovies(movie)
-    const movie_query = "select MovieId from Movie where MovieTitle like $1 limit 1;"
+    getMovies(movie)
+    const movie_query = "select MovieId from Movie where MovieTitle = $1 limit 1;"
     
     db.any(movie_query, [movie])
-        .then(function (movie_id) {
-            console.log(movie_id)
+        .then(function (movies) {
+            const movie_id = movies[0].movieid
             const movie_rating = req.body.movie_rating
 
             const review_rating = 0
@@ -316,11 +316,6 @@ app.post('/create-post', (req, res) => {
                 .then(function (data) {
                     res.render('pages/home', { message: 'Created post!'})
                 })
-                .catch(function (err) {
-                    res.render('pages/create-post', {
-                        message: 'Error creating post. Please try again.'
-                    })
-                });
         })
         .catch(function (err) {
             res.render('pages/create-post', {
@@ -328,6 +323,7 @@ app.post('/create-post', (req, res) => {
             })
         });
 })
+
 
 app.get('/welcome', (req, res) => {
   res.json({status: 'success', message: 'Welcome!'});
