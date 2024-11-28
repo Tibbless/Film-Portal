@@ -6,7 +6,7 @@ const path = require('path');
 const pgp = require('pg-promise')();
 const bodyParser = require('body-parser');
 const session = require('express-session');
-const axios = require('axios')
+const axios = require('axios');
 
 // -------------------------------------  APP CONFIG   ----------------------------------------------
 
@@ -35,15 +35,24 @@ app.use(
     }
   })
 );
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-);
+
+// app.use(
+//   bodyParser.urlencoded({
+//     extended: true,
+//   })
+// );
+
+app.use(bodyParser.urlencoded({
+  parameterLimit: 100000,
+  limit: 52428800,
+  extended: true
+}));
+app.use(express.json({limit : 52428800}));
+// app.use(express.urlencoded({extended: true, limit:52428800}));
 
 // -------------------------------------  DB CONFIG AND CONNECT   ---------------------------------------
 const dbConfig = {
-  host: 'db',
+  host: process.env.POSTGRES_HOST,
   port: 5432,
   database: process.env.POSTGRES_DB,
   user: process.env.POSTGRES_USER,
@@ -62,6 +71,24 @@ db.connect()
     console.log('ERROR', error.message || error);
   });
 
+function getMovies(title) {
+    const localMoviesData = getMoviesLocal(title)
+
+    if (!localMoviesData) {
+        getMoviesExternal(title)
+    } else {
+        return localMoviesData
+    }
+}
+
+function getMoviesLocal(title) {
+    const query = `select * from Movies where MoviesTitle like $1`
+    const values = [title]
+
+    db.one(query, values)
+      .then(data => { console.log(data) })
+      .catch(error => { console.log(error) })
+}
 
 // hashing stuff
 const crypto = require('crypto');
@@ -72,6 +99,11 @@ function hashPassword(password) {
     .update(password)
     .digest('hex');
 }
+
+
+// =========================================================================================================
+//      Helper Functions
+// =========================================================================================================
 
 
 async function apply(async_fetch, async_param, func) {
@@ -162,6 +194,16 @@ async function getMovies(title) {
     }
 }
 
+
+// =========================================================================================================
+//      Endpoints
+// =========================================================================================================
+
+app.get('/', (req, res) => {
+  res.redirect('/login');
+});
+
+
 app.get('/login', (req, res) => {
   const error = req.session.error || null;
   const message = req.session.message || null;
@@ -193,9 +235,11 @@ app.post('/login', async (req, res) => {
     }
 
     // set session user ID on successful login
-    req.session.userId = user.ClientId;
+    
+    req.session.userId = user.clientid;
     req.session.error = null;  // clear error after successful login
-    res.redirect('/home');
+    res.redirect('/settings');
+    //res.redirect('/home');
   } catch (error) {
     console.error('Error during login:', error);
     req.session.error = 'An error occurred during login. Please try again.';
@@ -234,10 +278,11 @@ app.post('/register', async (req, res) => {
     await db.none(
       'INSERT INTO Client (Username, Password, Email, FirstName, LastName) VALUES ($1, $2, $3, $4, $5)', 
       [Username, hashedPassword, Email, FirstName, LastName]
-    );
 
-    req.session.message = 'Registration successful! Please log in.';
+    );
+    res.status(200);
     res.redirect('/login');
+
   } catch (error) {
     res.status(400);
     console.error('Error during registration:', error);
@@ -247,94 +292,44 @@ app.post('/register', async (req, res) => {
 });
 
 app.get('/home', (req, res) => {
-
   res.render('pages/home');
 });
 
-app.get('/search', (req, res) => {
-  const error = req.session.error || null; // get error message, if no error message then dont display error
-  req.session.error = null; // clear the error message after retrieving it
+app.get('/create-post', (req, res) => {
+    res.render('pages/create-post')
+})
 
-  res.render('pages/search', { error }); // render the search page with error message
-});
+app.post('/create-post', (req, res) => {
+    const title = req.body.title
+    const movie = req.body.movie
+    getMovies(movie)
+    const movie_query = "select MovieId from Movie where MovieTitle = $1 limit 1;"
+    
+    db.any(movie_query, [movie])
+        .then(function (movies) {
+            const movie_id = movies[0].movieid
+            const movie_rating = req.body.movie_rating
 
+            const review_rating = 0
+            const client_id = req.session.userId
+            const body = req.body.body
 
-app.post('/search', async (req, res) => {
-  const { searchType, query } = req.body;
+            const query = "insert into Review (ReviewBody, MovieRating, ReviewRating, ClientId, MovieId) values ($1, $2, $3, $4, $5) returning *;"
 
-  // validate user input
-  if (!query || !searchType) {
-    req.session.error = 'Search type and query are required.';
-    return res.redirect('/search');
-  }
+            const inputs = [body, movie_rating, review_rating, client_id, movie_id]
 
-  try {
-    let results = [];
+            db.any(query, inputs)
+                .then(function (data) {
+                    res.render('pages/home', { message: 'Created post!'})
+                })
+        })
+        .catch(function (err) {
+            res.render('pages/create-post', {
+                message: 'Error creating post. Please try again.'
+            })
+        });
+})
 
-    if (searchType === 'byUser') {
-      // search for reviews by a specific user
-      results = await db.any(
-        `SELECT r.ReviewId, m.MovieTitle, c.Username AS Author, r.ReviewBody
-         FROM Review r
-         JOIN Client c ON r.ClientId = c.ClientId
-         JOIN Movie m ON r.MovieId = m.MovieId
-         WHERE c.Username ILIKE $1
-         ORDER BY r.ReviewId ASC`,
-        [`%${query}%`]
-      );
-    } else if (searchType === 'byMovie') {
-      // search for revews of a specific movie
-      results = await db.any(
-        `SELECT r.ReviewId, m.MovieTitle, c.Username AS Author, r.ReviewBody
-         FROM Review r
-         JOIN Client c ON r.ClientId = c.ClientId
-         JOIN Movie m ON r.MovieId = m.MovieId
-         WHERE m.MovieTitle ILIKE $1
-         ORDER BY r.ReviewId ASC`,
-        [`%${query}%`]
-      );
-    } else if (searchType === 'byBody') {
-      // search for reviews contaiining specific text
-      results = await db.any(
-        `SELECT r.ReviewId, m.MovieTitle, c.Username AS Author, r.ReviewBody
-         FROM Review r
-         JOIN Client c ON r.ClientId = c.ClientId
-         JOIN Movie m ON r.MovieId = m.MovieId
-         WHERE r.ReviewBody ILIKE $1
-         ORDER BY r.ReviewId ASC`,
-        [`%${query}%`]
-      );
-    } else {
-      req.session.error = 'Invalid search type.';
-      return res.redirect('/search');
-    }
-
-    // if no results are found send error
-    if (results.length === 0) {
-      req.session.error = 'No results found.';
-      return res.redirect('/search');
-    }
-
-    // store the results in the session and redirect to results page
-    req.session.results = results;
-    req.session.error = null; // clear any previous errors
-    res.redirect('/results');
-  } catch (error) {
-    console.error('Error during search:', error);
-    req.session.error = 'An error occurred during the search. Please try again.';
-    res.redirect('/search');
-  }
-});
-
-app.get('/results', (req, res) => {
-  const error = req.session.error || null;
-  const results = req.session.results || null;
-
-  req.session.error = null; // clear the error
-  req.session.results = null; // clear the results
-
-  res.render('pages/results', { error, results }); // pass data to the view
-});
 
 app.get('/welcome', (req, res) => {
   res.json({status: 'success', message: 'Welcome!'});
@@ -364,8 +359,125 @@ app.get('/test_query', (req, res) => {
         )
 });
 
+app.get('/settings', (req, res) => {
+  console.log("\n\n\n====================");
+  console.log(req.body);
+  console.log("\n\n\n");
+  res.render('pages/settings');
+})
+
+app.post('/settings/updateUsername', (req, res) => {
+  const newUsername = req.body.username;
+  const userId = req.session.userId;
+  const query = "UPDATE Client SET Username = $1 WHERE ClientId = $2;"
+  
+  db.any(query, [newUsername, userId]).then(data => {
+    res.render('pages/settings', {
+      message: "Successfully updated username"
+    });
+    // res.redirect('/settings',
+    // {
+    //   status: 200,
+    //   message: "Sucessfully updated username"
+    // });
+  }).catch(error => {
+    console.log(error);
+    res.redirect('/settings');
+  });
+});
+
+app.post('/settings/updatePassword', (req, res) => {
+  const newPassword = req.body.password;
+  const newPasswordConfirm = req.body.password_confirm;
+  const userId = req.session.userId;
+  const query = "UPDATE Client SET Password = $1 WHERE ClientId = $2;"
+  
+  if (newPassword != newPasswordConfirm) {
+    res.render('pages/settings', {
+      message: "Passwords do not match"
+    });
+  }
+
+  const hashedPassword = hashPassword(newPassword);
+
+  db.any(query, [hashedPassword, userId]).then(data => {
+    res.render('pages/settings', {
+      message: "Successfully updated password"
+    });
+  }).catch(error => {
+    console.log(error);
+    res.redirect('/settings');
+  })
+})
+
+app.post('/settings/updatePicture', (req, res) => {
+  const newPicture = req.body.newPicture;
+  if (newPicture) {
+
+  const selectQuery = "SELECT imageid FROM Client_images WHERE ClientID = $1;";
+
+  db.any(selectQuery, [req.session.userId]).then( data => {
+    if (data.imageid) {
+      const updateQuery = "UPDATE Client_images SET ClientImage = $1 WHERE InageId = $2;";
+      db.any(updateQuery, [newPicture, data.imageid]).then( () => {
+        res.render('pages/settings', {
+          message: "Picture succssfully updated"
+        });
+    }).catch(error => {
+      console.log(error);
+      res.redirect("/settings");
+    });
+    }
+    else {
+      const insertQuery = "INSERT INTO Client_images (ClientImage, ClientId) VALUES ($1, $2);";
+
+      db.any(insertQuery, [newPicture, req.session.userId]).then( data => {
+        res.render("pages/settings", {
+          message: "Sucessfully updated picture"
+        });
+    }).catch(error => {
+      console.log(error)
+      res.redirect("/settings");
+    });
+    }
+  });
+  }
+  else {
+    console.log("Unable to get image")
+    res.render("pages/settings", {
+      message: "Unable to update image"
+    });
+  }
+})
+
+app.post('/settings/deleteAccount', (req, res) => {
+  //let deleteConfirm = confirm("Are you sure you want to delete your account?");
+
+  // if (deleteConfirm) {
+    const userId = req.session.userId;
+    const query = "DELETE FROM CLIENT WHERE ClientId = $1 RETURNING *;"
+    db.any(query, [userId]).then(data => {
+      //console.log(data);
+      // res.status(200).json({
+      //   message: "Successfully deleted account",
+      // })
+      req.session.destroy();
+      res.render('pages/login', {
+        message: "Account Deleted"
+      });
+    }).catch(error => {
+      console.log(error);
+      res.redirect('/settings');
+    })
+  
+  // } else {
+  //   res.redirect('/settings');
+  // }
+})
+
+
 app.listen(3000);
 
-// module.exports = app.listen(3000);
+//module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
 

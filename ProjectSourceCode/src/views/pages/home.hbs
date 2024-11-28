@@ -1,1 +1,34 @@
-HOME PAGE
+{{> header }}
+
+
+<!--<div class="nav_bar">
+    <p class="nav_text">Navigation</p>
+    <ul class="vertical ex">
+        <div class="nav_item">
+            <a class="active" href="javascript:void(0)">Home</a></li>
+        </div>
+        <div>
+            <a class="active" href="javascript:void(0)">Profile</a></li>
+        </div>
+        <div>
+            <a class="active" href="javascript:void(0)">Create Post</a></li>
+        </div>
+    </ul>
+</div>-->
+
+{{> nav }}
+     
+
+
+<div id="timeline_grid" class="home_list">
+    {{!#each (API CALL EVENT)}}
+    <div class="home_item display:flex; flex-direction: column">
+        <!-- PUT NECESSARY ITEMS HERE FROM API CALL  USE get_movies function-->
+        <p>Put api results here</p>
+        <p style="border-style: solid; border-color: #A30023">Friends reviews/comments here</p>
+    </div>
+    {{!/each}}
+
+</div>
+
+ {{> footer }}
