@@ -1,16 +1,41 @@
-<div class="container d-flex justify-content-center align-items-center min-vh-100">
-  {{#if error}}
-    <p class="error">{{error}}</p>
-  {{/if}}
+<div style="background-color: #F6F7EB; min-height: 100vh; padding: 20px; color: #050014;">
+  <div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div style="width: 300px; padding: 20px; border-radius: 12px; background-color: #F6F7EB;">
+      {{#if error}}
+        <p class="error" style="color: red; font-weight: bold; margin-bottom: 20px;">{{error}}</p>
+      {{/if}}
 
-  <form action="/search" method="POST">
-    <label for="searchType">Search By:</label>
-    <select name="searchType" id="searchType">
-      <option value="byUser">User</option>
-      <option value="byMovie">Movie</option>
-      <option value="byBody">Review Body</option>
-    </select>
-    <input type="text" name="query" placeholder="Enter search query" required />
-    <button type="submit">Search</button>
-  </form>
+      <form action="/search" method="POST" style="text-align: center;">
+        <div class="mb-3">
+          <label for="searchType" class="form-label">Search By:</label>
+          <select 
+            name="searchType" 
+            id="searchType" 
+            class="form-control rounded" 
+            style="background-color: #7A001B; color: #F6F7EB; border: 1px solid #A30023;">
+            <option value="byUser">User</option>
+            <option value="byMovie">Movie</option>
+            <option value="byBody">Review Body</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <input 
+            type="text" 
+            name="query" 
+            placeholder="Enter search query" 
+            class="form-control rounded" 
+            style="background-color: #7A001B; color: #F6F7EB; border: 1px solid #A30023; placeholder: #F6F7EB" 
+            required>
+        </div>
+
+        <button 
+          type="submit" 
+          class="btn w-100 rounded" 
+          style="background-color: #7A001B; color: #F6F7EB; border: 1px solid #A30023;">
+          Search
+        </button>
+      </form>
+    </div>
+  </div>
 </div>

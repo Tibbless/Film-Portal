@@ -1,18 +1,48 @@
-<div class="container d-flex justify-content-center align-items-center min-vh-100">
-  <form action="/login" method="POST">
-    <label for="Email">Email</label>
-    <input type="email" id="Email" name="Email" required>
-    
-    <label for="Password">Password</label>
-    <input type="password" id="Password" name="Password" required>
-    
-    <button type="submit">Login</button>
+<div style="background-color: #F6F7EB">
+  <div class="container d-flex justify-content-center align-items-center min-vh-100" style="background-color: #F6F7EB; color: #050014;">
+    <form action="/login" method="POST" style="width: 300px; padding: 20px; border-radius: 12px; background-color: #F6F7EB;">
+      <div class="mb-3">
+        <label for="Email" class="form-label">Email</label>
+        <input 
+          type="email" 
+          id="Email" 
+          name="Email" 
+          class="form-control rounded" 
+          style="background-color: #7A001B; color: #F6F7EB; border: 1px solid #A30023;" 
+          required>
+      </div>
 
-    {{#if error}}
-      <div style="color: red; margin-top: 10px;">{{error}}</div>
-    {{/if}}
-    {{#if message}}
-      <div style="color: green; margin-top: 10px;">{{message}}</div>
-    {{/if}}
-  </form>
+      <div class="mb-3">
+        <label for="Password" class="form-label">Password</label>
+        <input 
+          type="password" 
+          id="Password" 
+          name="Password" 
+          class="form-control rounded" 
+          style="background-color: #7A001B; color: #F6F7EB; border: 1px solid #A30023;" 
+          required>
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn w-100 rounded mb-3" 
+        style="background-color: #7A001B; color: #F6F7EB; border: 1px solid #A30023;">
+        Login
+      </button>
+
+      <a 
+        href="/register" 
+        class="btn w-100 rounded" 
+        style="background-color: #7A001B; color: #F6F7EB; border: 1px solid #A30023; text-align: center; text-decoration: none;">
+        Register
+      </a>
+
+      {{#if error}}
+        <div style="color: red; margin-top: 10px;">{{error}}</div>
+      {{/if}}
+      {{#if message}}
+        <div style="color: green; margin-top: 10px;">{{message}}</div>
+      {{/if}}
+    </form>
+  </div>
 </div>
