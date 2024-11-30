@@ -238,8 +238,7 @@ app.post('/login', async (req, res) => {
     
     req.session.userId = user.clientid;
     req.session.error = null;  // clear error after successful login
-    res.redirect('/settings');
-    //res.redirect('/home');
+    res.redirect('/home');
   } catch (error) {
     console.error('Error during login:', error);
     req.session.error = 'An error occurred during login. Please try again.';
