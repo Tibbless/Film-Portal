@@ -1,0 +1,33 @@
+{{> header }}
+
+{{> nav }}
+
+<div style="border-radius: 20px; border-style: solid; width: 800px; margin: 0 auto; display: flex; align-items: center;">
+    <!-- Image and Username Container -->
+    <div style="display: flex; flex-direction: column; align-items: center;">
+        <img src={{pfp_image}} 
+             style="clip-path: circle(); width: 150px; height: 150px;">
+        <p style="font-size: 34px; color: #333; margin-top: 10px;"> {{userId}}</p>
+    </div>
+    
+    <!-- Stacked Text Divs -->
+    <div style="margin-left: 20px; padding: 20px; flex-grow: 1; display: flex; flex-direction: column;">
+        <div style="font-size: 18px; color: #333;">First Name:</div>
+        <div style="font-size: 18px; color: #333; background-color:#aaaaaa">{{first_name}}</div>
+
+        <div style="font-size: 18px; color: #333;">Last Name:</div>
+        <div style="font-size: 18px; color: #333; background-color:#aaaaaa">{{last_name}}</div>
+
+        <div style="font-size: 18px; color: #333;">Email:</div>
+        <div style="font-size: 18px; color: #333; background-color:#aaaaaa">{{email}}</div>
+    </div>
+</div>
+
+
+
+
+<div>
+    {{ username }}
+</div>
+
+{{> footer }}
