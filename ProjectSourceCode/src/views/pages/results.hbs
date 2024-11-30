@@ -1,0 +1,28 @@
+<div style="background-color: #F6F7EB; min-height: 100vh; padding: 20px; color: #050014;">
+  <div class="container" style="max-width: 600px; margin: auto; padding: 20px; border-radius: 12px; background-color: #F6F7EB;">
+    {{#if error}}
+      <p class="error" style="color: red; font-weight: bold; margin-bottom: 20px;">{{error}}</p>
+    {{/if}}
+
+    {{#if results}}
+      <h2 style="text-align: center; margin-bottom: 20px;">Search Results:</h2>
+      <ul style="list-style: none; padding: 0;">
+        {{#each results}}
+          <li style="margin-bottom: 20px; padding: 15px; border: 1px solid #A30023; border-radius: 8px; background-color: #7A001B; color: #F6F7EB;">
+            <p><strong>Movie Title:</strong> {{this.MovieTitle}}</p>
+            <p><strong>Author:</strong> {{this.Author}}</p>
+            <p><strong>Review:</strong> {{this.ReviewBody}}</p>
+          </li>
+        {{/each}}
+      </ul>
+    {{else}}
+      <p style="text-align: center; margin-top: 20px; font-size: 16px;">No results found.</p>
+    {{/if}}
+
+    <div style="text-align: center; margin-top: 20px;">
+      <a href="/search" class="btn rounded" style="background-color: #7A001B; color: #F6F7EB; border: 1px solid #A30023; text-decoration: none; padding: 10px 20px; display: inline-block;">
+        Back to Search
+      </a>
+    </div>
+  </div>
+</div>
