@@ -71,25 +71,6 @@ db.connect()
     console.log('ERROR', error.message || error);
   });
 
-function getMovies(title) {
-    const localMoviesData = getMoviesLocal(title)
-
-    if (!localMoviesData) {
-        getMoviesExternal(title)
-    } else {
-        return localMoviesData
-    }
-}
-
-function getMoviesLocal(title) {
-    const query = `select * from Movies where MoviesTitle like $1`
-    const values = [title]
-
-    db.one(query, values)
-      .then(data => { console.log(data) })
-      .catch(error => { console.log(error) })
-}
-
 // hashing stuff
 const crypto = require('crypto');
 
@@ -105,7 +86,13 @@ function hashPassword(password) {
 //      Helper Functions
 // =========================================================================================================
 
+// General note:
+// Results are objects of the form: {success : true, result } (with different
+// names for result, depending on the function).
+// Errors are objects of the form: {success : false, error}
 
+// Try an async function 'async_fetch' with a single parameter 'async_param',
+// returning an error on failure
 async function apply(async_fetch, async_param, func) {
     try {
         return func(await async_fetch(async_param))
@@ -114,6 +101,7 @@ async function apply(async_fetch, async_param, func) {
     }
 }
 
+// Get movies from the local database on our server
 async function getMoviesLocal(title) {
     const query = 
     `select * 
@@ -130,6 +118,10 @@ async function getMoviesLocal(title) {
     }
 }
 
+// Get movies from TMDB, a movie database
+// On success, returns an object with relevant fields
+// from the first page of movies
+// (title, release_date, description, and image)
 async function getMoviesExternal(title) {
     const tmdb_query = {
         url: `https://api.themoviedb.org/3/search/movie`,
@@ -167,6 +159,7 @@ async function getMoviesExternal(title) {
     return await apply(axios, tmdb_query, organizeMovies)
 }
 
+// Caches movies from TMDB into the local (server) database
 async function cacheMovies(response) {
     const moviesData = response.moviesData
     const query = `
@@ -185,6 +178,12 @@ async function cacheMovies(response) {
         return {success: false, error}
     }
 }
+
+// First attempts to find 'title' in the local
+// (server) database using getMoviesLocal.
+// If this fails, the function gets
+// the first result from TMDB, caches
+// it into the database, and returns the result
 
 async function getMovies(title) {
     const localRes = await getMoviesLocal(title)
@@ -303,13 +302,16 @@ app.get('/create-post', (req, res) => {
 app.post('/create-post', (req, res) => {
     const title = req.body.title
     const movie = req.body.movie
+    // First ensure 'movie' is in the local (server) database.
     getMovies(movie)
         .then(_movie => {
             const movie_query = `select MovieId from Movie where MovieTitle = $1;`
 
+            // Get the MovieId of 'movie'
             return db.any(movie_query, [movie])
         })
         .then(function (movies) {
+            // Gets the relevant fields
             const movie_id = movies[0].movieid
             const movie_rating = req.body.movie_rating
 
@@ -339,29 +341,7 @@ app.get('/welcome', (req, res) => {
   res.json({status: 'success', message: 'Welcome!'});
 });
 
-app.get('/test_database', (req, res) => {
-    const testOne = getMovies('Oddity')
-        .then(resultOne => {
-            const testTwo = getMoviesLocal('The Incredibles').
-                then(resultTwo => {
-                    res.json({status: 'success', message: {testOne: resultOne, testTwo: resultTwo}})
-                    }
-                )
-            }
-        )
-});
 
-app.get('/test_query', (req, res) => {
-    const testOne = getMoviesExternal('Stargate')
-        .then(resultOne => {
-            const testTwo = getMovies('Coraline').
-                then(resultTwo => {
-                    res.json({status: 'success', message: {testOne: resultOne, testTwo: resultTwo}})
-                    }
-                )
-            }
-        )
-});
 
 app.get('/settings', (req, res) => {
   console.log("\n\n\n====================");
@@ -478,6 +458,33 @@ app.post('/settings/deleteAccount', (req, res) => {
   //   res.redirect('/settings');
   // }
 })
+
+/* Tests for the Database */
+app.get('/test_database', (req, res) => {
+    const testOne = getMovies('Oddity')
+        .then(resultOne => {
+            const testTwo = getMoviesLocal('The Incredibles').
+                then(resultTwo => {
+                    res.json({status: 'success', message: {testOne: resultOne, testTwo: resultTwo}})
+                    }
+                )
+            }
+        )
+});
+
+app.get('/test_query', (req, res) => {
+    const testOne = getMoviesExternal('Stargate')
+        .then(resultOne => {
+            const testTwo = getMovies('Coraline').
+                then(resultTwo => {
+                    res.json({status: 'success', message: {testOne: resultOne, testTwo: resultTwo}})
+                    }
+                )
+            }
+        )
+});
+
+/* End Tests */
 
 
 app.listen(3000);
