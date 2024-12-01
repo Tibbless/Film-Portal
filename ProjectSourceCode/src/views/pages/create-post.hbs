@@ -1,22 +1,67 @@
-<h1>Create Post</h1>
-<form method="post" action="/create-post">
-    <div class="mb-3">
-        <label for="text" class="form-label">Title</label>
-        <input type="text" class="form-control" id="title" minlength = "0" required/>
-    </div>
-    <div class ="mb-3">
-        <label for="text" class="form-label">Movie</label>
-        <input type="text" class="form-control" name="movie" minlength="0" required/>
-    </div>
-    <div class="mb-3">
-        <label for="text" class="form-label">Movie Rating</label>
-        <input type="number" class="form-control" name="movie_rating" min="1", max="10" required/>
-    </div>
-    <div class="mb-3">
-        <label for="text" class="form-label">Body</label>
-        <input type="textarea" class="form-control" name="body" minlength="0" required />
+<div style="background-color: #F6F7EB;">
+  <div class="container d-flex justify-content-center align-items-center min-vh-100" style="color: #050014;">
+    <div style="width: 500px; background-color: #7A001B; padding: 20px; border-radius: 12px; border: 2px solid #A30023; color: #F6F7EB;">
+      <h1 class="text-center mb-4" style="color: #F6F7EB;">Create Post</h1>
+      <form method="post" action="/create-post">
+        <!-- Title -->
+        <div class="mb-3">
+          <label for="title" class="form-label" style="color: #F6F7EB;">Title</label>
+          <input 
+            type="text" 
+            class="form-control rounded" 
+            id="title" 
+            name="title"
+            style="background-color: #A30023; color: #F6F7EB; border: 1px solid #F6F7EB;" 
+            minlength="0" 
+            required />
         </div>
-    <div class="mb-3">
-        <input type="submit" class="btn btn-primary" value="Post" />
+
+        <!-- Movie -->
+        <div class="mb-3">
+          <label for="movie" class="form-label" style="color: #F6F7EB;">Movie</label>
+          <input 
+            type="text" 
+            class="form-control rounded" 
+            name="movie"
+            style="background-color: #A30023; color: #F6F7EB; border: 1px solid #F6F7EB;" 
+            minlength="0" 
+            required />
+        </div>
+
+        <!-- Movie Rating -->
+        <div class="mb-3">
+          <label for="movie_rating" class="form-label" style="color: #F6F7EB;">Movie Rating</label>
+          <input 
+            type="number" 
+            class="form-control rounded" 
+            name="movie_rating"
+            style="background-color: #A30023; color: #F6F7EB; border: 1px solid #F6F7EB;" 
+            min="1" 
+            max="10" 
+            required />
+        </div>
+
+        <!-- Body -->
+        <div class="mb-3">
+          <label for="body" class="form-label" style="color: #F6F7EB;">Body</label>
+          <textarea 
+            class="form-control rounded" 
+            name="body"
+            rows="4"
+            style="background-color: #A30023; color: #F6F7EB; border: 1px solid #F6F7EB;" 
+            minlength="0" 
+            required></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="mb-3">
+          <input 
+            type="submit" 
+            class="btn w-100 rounded" 
+            value="Post" 
+            style="background-color: #A30023; color: #F6F7EB; border: 1px solid #F6F7EB;" />
+        </div>
+      </form>
     </div>
-</form>
+  </div>
+</div>

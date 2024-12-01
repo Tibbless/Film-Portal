@@ -2,32 +2,38 @@
 
 {{> nav }}
 
-<div style="border-radius: 20px; border-style: solid; width: 800px; margin: 0 auto; display: flex; align-items: center;">
-    <!-- Image and Username Container -->
-    <div style="display: flex; flex-direction: column; align-items: center;">
-        <img src={{pfp_image}} 
-             style="clip-path: circle(); width: 150px; height: 150px;">
-        <p style="font-size: 34px; color: #333; margin-top: 10px;"> {{userId}}</p>
-    </div>
-    
-    <!-- Stacked Text Divs -->
-    <div style="margin-left: 20px; padding: 20px; flex-grow: 1; display: flex; flex-direction: column;">
-        <div style="font-size: 18px; color: #333;">First Name:</div>
-        <div style="font-size: 18px; color: #333; background-color:#aaaaaa">{{first_name}}</div>
+<div style="background-color: #F6F7EB;">
+  <div class="container d-flex justify-content-center align-items-center min-vh-100" style="color: #050014;">
+    <div class="d-flex flex-column align-items-center rounded" style="width: 800px; background-color: #7A001B; color: #F6F7EB; padding: 20px; border: 2px solid #A30023;">
+      <!-- Profile Picture and Username -->
+      <div class="d-flex flex-column align-items-center mb-4">
+        <img src="{{pfp_image}}" 
+             class="rounded-circle mb-3" 
+             style="width: 150px; height: 150px; border: 3px solid #F6F7EB;">
+        <h2>{{userId}}</h2>
+      </div>
 
-        <div style="font-size: 18px; color: #333;">Last Name:</div>
-        <div style="font-size: 18px; color: #333; background-color:#aaaaaa">{{last_name}}</div>
-
-        <div style="font-size: 18px; color: #333;">Email:</div>
-        <div style="font-size: 18px; color: #333; background-color:#aaaaaa">{{email}}</div>
+      <!-- User Details -->
+      <div class="d-flex flex-column w-100">
+        <div class="mb-3">
+          <label class="form-label">First Name:</label>
+          <div class="p-2 rounded" style="background-color: #A30023;">{{first_name}}</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Last Name:</label>
+          <div class="p-2 rounded" style="background-color: #A30023;">{{last_name}}</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email:</label>
+          <div class="p-2 rounded" style="background-color: #A30023;">{{email}}</div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
-
-
-
 <div>
-    {{ username }}
+  {{ username }}
 </div>
 
 {{> footer }}
