@@ -132,15 +132,19 @@ async function getMoviesLocal(title) {
 
 async function getMoviesExternal(title) {
     const tmdb_query = {
-        url: `https://api.themoviedb.org/3/search/movie`,
+        // NOTE: the only way I could make this work is putting
+        // all of the parameters into the url. This is a
+        // TMDB specific problem, not a problem with our code base.
+        //url: `https://api.themoviedb.org/3/search/movie`,
+        url: `https://api.themoviedb.org/3/search/movie?query=test&include_adult=false&language=en-US&page=1&api_key=${process.env.API_KEY}`,
         method: `GET`,
-        params: {
-            query: title,
-            include_adult: false,
-            language: "en-USA",
-            page: 1, // Limit API calls
-            api_key: process.env.API_KEY
-        }
+        //params: {
+        //    query: title,
+        //    include_adult: false,
+        //    language: "en-US",
+        //    page: 1, // Limit API calls
+        //    api_key: process.env.API_KEY
+        //},
     }
     
     const organizeMovies = (response) => {
@@ -174,7 +178,9 @@ async function cacheMovies(response) {
         Values ($1, $2, $3, $4) 
         returning *;
     `
+       
     const firstMovie = moviesData[0]
+
     const params = [firstMovie.title, firstMovie.description, firstMovie.release_date, firstMovie.image]
     try {
         const movie = await db.one(query, params)
@@ -302,27 +308,31 @@ app.post('/create-post', (req, res) => {
     const title = req.body.title
     const movie = req.body.movie
     getMovies(movie)
-    const movie_query = "select MovieId from Movie where MovieTitle = $1 limit 1;"
-    
-    db.any(movie_query, [movie])
-        .then(function (movies) {
-            const movie_id = movies[0].movieid
-            const movie_rating = req.body.movie_rating
+        .then(function (_movie) {
+            const movie_query = `select MovieId from Movie where MovieTitle = '${movie}';`
 
-            const review_rating = 0
-            const client_id = req.session.userId
-            const body = req.body.body
+            db.any(movie_query, [])
+                .then(function (movies) {
+                    const movie_id = movies[0].movieid
+                    const movie_rating = req.body.movie_rating
 
-            const query = "insert into Review (ReviewBody, MovieRating, ReviewRating, ClientId, MovieId) values ($1, $2, $3, $4, $5) returning *;"
+                    const review_rating = 0
+                    const client_id = req.session.userId
+                    const body = req.body.body
 
-            const inputs = [body, movie_rating, review_rating, client_id, movie_id]
+                    const query = "insert into Review (ReviewBody, MovieRating, ReviewRating, ClientId, MovieId) values ($1, $2, $3, $4, $5) returning *;"
 
-            db.any(query, inputs)
-                .then(function (data) {
-                    res.render('pages/home', { message: 'Created post!'})
+                    const inputs = [body, movie_rating, review_rating, client_id, movie_id]
+
+                    db.any(query, inputs)
+                        .then(function (data) {
+                            res.render('pages/home', { message: 'Created post!'})
+                        })
                 })
         })
+
         .catch(function (err) {
+            console.log(err)
             res.render('pages/create-post', {
                 message: 'Error creating post. Please try again.'
             })
