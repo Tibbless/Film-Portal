@@ -292,7 +292,11 @@ app.post('/register', async (req, res) => {
 });
 
 app.get('/home', (req, res) => {
-  res.render('pages/home');
+    const query = 'select * from movie;'
+    db.any(query, [])
+        .then(movies => {
+            res.render('pages/home', {movies: movies});
+        })
 });
 
 app.get('/create-post', (req, res) => {
