@@ -464,7 +464,7 @@ app.post('/settings/deleteAccount', (req, res) => {
 })
 
 app.post('/search', async (req, res) => {
-  const { searchType, query } = req.body; // Extract form inputs
+  const { searchType, query } = req.body; // inputs
   let results = [];
   let error = null;
 
@@ -497,7 +497,7 @@ app.post('/search', async (req, res) => {
       error = 'Invalid search type.';
     }
 
-    console.log('Results:', results); // Debugging statement
+    console.log('Results:', results); // debuging
   } catch (err) {
     console.error(err);
     error = 'An error occurred while searching.';
@@ -507,7 +507,7 @@ app.post('/search', async (req, res) => {
 });
 
 
-// Search Page Route (GET)
+// search render
 app.get('/search', (req, res) => {
   res.render('pages/search', { error: null });
 });
