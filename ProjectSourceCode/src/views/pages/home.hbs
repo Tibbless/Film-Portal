@@ -21,39 +21,14 @@
 
 
 <div id="timeline_grid" class="home_list">
-    
-    <div class="home_item display:flex; flex-direction: column">
-        <!-- PUT NECESSARY ITEMS HERE FROM API CALL  USE get_movies function-->
-        <h2>Gladiator II</h2>
-        <img src="https://cms-assets.webediamovies.pro/cdn-cgi/image/dpr=1,fit=scale-down,gravity=auto,metadata=none,quality=85,width=2500/production/3575/643104b564ec2528501992a8bb2e064a.jpeg" alt="GLADIATOR II"  style="width: 200px; height: 300px; object-fit: cover;"/>
-        <p>Years after witnessing the death of Maximus at the hands of his uncle, Lucius must enter the Colosseum after the powerful emperors of Rome conquer his home. With rage in his heart and the future of the empire at stake, he looks to the past to find the strength and honor needed to return the glory of Rome to its people.</p>
-        <p><strong>Release Date:</strong> November 22, 2024</p>
-
-        <h3>Comments:</h3>
-        <p>friend_1: Great movie!</p>
-        <p>friend_2: 10/10!</p>
-    </div>
-    
-    <div class="home_item display:flex; flex-direction: column">
-        <!-- PUT NECESSARY ITEMS HERE FROM API CALL  USE get_movies function-->
-        <h2>Transformers One</h2>
-        <img src="https://www.fhstheflash.com/wp-content/uploads/2024/09/xl_transformers-one-movie-poster_101cb327.jpeg" alt="TRANSFORMERS ONE"  style="width: 200px; height: 300px; object-fit: cover;"/>
-        <p>TRANSFORMERS ONE is the untold origin story of Optimus Prime and Megatron, better known as sworn enemies, but once were friends bonded like brothers who changed the fate of Cybertron forever.</p>
-        <p><strong>Release Date:</strong> September 20, 2024</p>
-
-        <h3>Comments:</h3>
-        <p>friend_1: Great movie!</p>
-        <p>friend_2: 10/10!</p>
-    </div>
-
     {{#if movies.length}}
     <ul>
       {{#each movies}}
         <li>
-          <h2>{{MovieTitle}}</h2>
-          <p>{{MovieDescription}}</p>
-          <p><strong>Release Date:</strong> {{ReleaseDate}}</p>
-          <img src="{{MovieImage}}" alt="{{MovieTitle}}" />
+          <h2>{{this.movietitle}}</h2>
+          <p>{{this.moviedescription}}</p>
+          <p><strong>Release Date:</strong> {{this.releasedate}}</p>
+          <img src="{{this.movieimage}}" alt="{{this.movietitle}}" />
         </li>
       {{/each}}
     </ul>
