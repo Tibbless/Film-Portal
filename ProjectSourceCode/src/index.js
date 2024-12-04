@@ -463,6 +463,55 @@ app.post('/settings/deleteAccount', (req, res) => {
   // }
 })
 
+app.post('/search', async (req, res) => {
+  const { searchType, query } = req.body; // Extract form inputs
+  let results = [];
+  let error = null;
+
+  try {
+    if (searchType === 'byUser') {
+      results = await db.any(
+        `SELECT r.ReviewBody, c.Username AS Author, m.MovieTitle, m.MovieDescription, m.ReleaseDate, m.MovieImage
+         FROM Review r
+         JOIN Client c ON r.ClientId = c.ClientId
+         JOIN Movie m ON r.MovieId = m.MovieId
+         WHERE c.Username ILIKE $1`, [`%${query}%`]
+      );
+    } else if (searchType === 'byMovie') {
+      results = await db.any(
+        `SELECT r.ReviewBody, c.Username AS Author, m.MovieTitle, m.MovieDescription, m.ReleaseDate, m.MovieImage
+         FROM Review r
+         JOIN Client c ON r.ClientId = c.ClientId
+         JOIN Movie m ON r.MovieId = m.MovieId
+         WHERE m.MovieTitle ILIKE $1`, [`%${query}%`]
+      );
+    } else if (searchType === 'byBody') {
+      results = await db.any(
+        `SELECT r.ReviewBody, c.Username AS Author, m.MovieTitle, m.MovieDescription, m.ReleaseDate, m.MovieImage
+         FROM Review r
+         JOIN Client c ON r.ClientId = c.ClientId
+         JOIN Movie m ON r.MovieId = m.MovieId
+         WHERE r.ReviewBody ILIKE $1`, [`%${query}%`]
+      );
+    } else {
+      error = 'Invalid search type.';
+    }
+
+    console.log('Results:', results); // Debugging statement
+  } catch (err) {
+    console.error(err);
+    error = 'An error occurred while searching.';
+  }
+
+  res.render('pages/results', { results, error });
+});
+
+
+// Search Page Route (GET)
+app.get('/search', (req, res) => {
+  res.render('pages/search', { error: null });
+});
+
 /* Tests for the Database */
 app.get('/test_database', (req, res) => {
     const testOne = getMovies('Oddity')
