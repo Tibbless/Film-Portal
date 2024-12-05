@@ -9,9 +9,9 @@ services:
       - new-db-volume:/var/lib/postgresql/data:z
       - ./src/init_data:/docker-entrypoint-initdb.d:z  # Correct path to initialization SQL files
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: osbe
+      POSTGRES_PASSWORD: passwd
+      POSTGRES_DB: film_portal
       
   web:
     image: node:lts
