@@ -24,12 +24,15 @@
     {{#if movies.length}}
     <ul>
       {{#each movies}}
-        <li>
+        <div class="home_item display:flex; flex-direction: column">
           <h2>{{this.movietitle}}</h2>
+          <img src="{{this.movieimage}}" alt="{{this.movietitle}}"  style="width: 200px; height: 300px; object-fit: cover;"/>
           <p>{{this.moviedescription}}</p>
           <p><strong>Release Date:</strong> {{this.releasedate}}</p>
-          <img src="{{this.movieimage}}" alt="{{this.movietitle}}" />
-        </li>
+          <h3>Comments:</h3>
+          <p>friend_1: Great movie!</p>
+          <p>friend_2: 10/10!</p>
+        </div>
       {{/each}}
     </ul>
   {{else}}
