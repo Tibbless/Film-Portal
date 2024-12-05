@@ -36,6 +36,11 @@ app.use(
   })
 );
 
+app.use((req, res, next) => {
+  console.log('Session:', req.session);
+  next();
+});
+
 // app.use(
 //   bodyParser.urlencoded({
 //     extended: true,
@@ -291,12 +296,61 @@ app.post('/register', async (req, res) => {
   }
 });
 
-app.get('/home', (req, res) => {
-    const query = 'select * from movie;'
-    db.any(query, [])
-        .then(movies => {
-            res.render('pages/home', {movies: movies});
-        })
+app.get('/home', async (req, res) => {
+  try {
+      const query = `
+          SELECT 
+              m.MovieId,
+              m.MovieTitle, 
+              m.MovieImage, 
+              m.MovieDescription, 
+              m.ReleaseDate,
+              c.Username,
+              r.ReviewBody,
+              r.MovieRating
+          FROM 
+              Movie m
+          LEFT JOIN 
+              Review r ON m.MovieId = r.MovieId
+          LEFT JOIN 
+              Client c ON r.ClientId = c.ClientId
+          ORDER BY 
+              m.MovieId, r.ReviewId;
+      `;
+
+      const results = await db.any(query);
+
+      // Group reviews by movie
+      const moviesWithReviews = {};
+      results.forEach(row => {
+          if (!moviesWithReviews[row.movietitle]) {
+              moviesWithReviews[row.movietitle] = {
+                  movietitle: row.movietitle,
+                  movieimage: row.movieimage,
+                  moviedescription: row.moviedescription,
+                  releasedate: row.releasedate,
+                  reviews: []
+              };
+          }
+
+          // Only add review if it exists
+          if (row.reviewbody) {
+              moviesWithReviews[row.movietitle].reviews.push({
+                  username: row.username,
+                  reviewbody: row.reviewbody,
+                  movierating: row.movierating
+              });
+          }
+      });
+
+      // Convert to array for rendering
+      const movies = Object.values(moviesWithReviews);
+
+      res.render('pages/home', { movies: movies });
+  } catch (error) {
+      console.error('Error fetching movies and reviews:', error);
+      res.render('pages/home', { movies: [] });
+  }
 });
 
 app.get('/search', (req, res) => {
@@ -412,42 +466,72 @@ app.get('/create-post', (req, res) => {
     res.render('pages/create-post')
 })
 
-app.post('/create-post', (req, res) => {
-    const title = req.body.title
-    const movie = req.body.movie
-    // First ensure 'movie' is in the local (server) database.
-    getMovies(movie)
-        .then(_movie => {
-            const movie_query = `select MovieId from Movie where MovieTitle = $1;`
+app.post('/create-post', async (req, res) => {
+  console.log('Session User ID:', req.session.userId);
+  console.log('Request Body:', req.body);
 
-            // Get the MovieId of 'movie'
-            return db.any(movie_query, [movie])
-        })
-        .then(function (movies) {
-            // Gets the relevant fields
-            const movie_id = movies[0].movieid
-            const movie_rating = req.body.movie_rating
+  // Check if user is logged in
+  if (!req.session.userId) {
+      return res.status(401).render('pages/login', {
+          error: 'You must be logged in to create a post.'
+      });
+  }
 
-            const review_rating = 0
-            const client_id = req.session.userId
-            const body = req.body.body
+  const { title, movie, movie_rating, body } = req.body;
 
-            const query = "insert into Review (ReviewBody, MovieRating, ReviewRating, ClientId, MovieId) values ($1, $2, $3, $4, $5) returning *;"
+  try {
+      // First ensure 'movie' is in the local (server) database.
+      const movieResult = await getMovies(movie);
 
-            const inputs = [body, movie_rating, review_rating, client_id, movie_id]
+      if (!movieResult.success) {
+          return res.render('pages/create-post', {
+              message: 'Error: Could not find or add movie to database.'
+          });
+      }
 
-            return db.any(query, inputs)
-        })
-        .then(function (data) {
-            res.render('pages/home', { message: 'Created post!'})
-        })
-        .catch(function (err) {
-            console.log(err)
-            res.render('pages/create-post', {
-                message: 'Error creating post. Please try again.'
-            })
-        });
-})
+      // Get the MovieId of the movie
+      const movieQuery = `SELECT MovieId FROM Movie WHERE MovieTitle = $1;`;
+      const movies = await db.any(movieQuery, [movie]);
+
+      if (movies.length === 0) {
+          return res.render('pages/create-post', {
+              message: 'Error: Movie not found in database.'
+          });
+      }
+
+      const movie_id = movies[0].movieid;
+      const review_rating = 0; // Default review rating
+      const client_id = req.session.userId;
+
+      console.log('Inserting Review:', {
+          body,
+          movie_rating,
+          review_rating,
+          client_id,
+          movie_id
+      });
+
+      const query = `
+          INSERT INTO Review (ReviewBody, MovieRating, ReviewRating, ClientId, MovieId) 
+          VALUES ($1, $2, $3, $4, $5) 
+          RETURNING *;
+      `;
+
+      const inputs = [body, movie_rating, review_rating, client_id, movie_id];
+
+      // Insert the review
+      await db.any(query, inputs);
+
+      // Redirect to home page to show updated reviews
+      res.redirect('/home');
+
+  } catch (err) {
+      console.error('Full Error Creating Post:', err);
+      res.render('pages/create-post', {
+          message: 'Error creating post. Please try again.'
+      });
+  }
+});
 
 
 app.get('/welcome', (req, res) => {

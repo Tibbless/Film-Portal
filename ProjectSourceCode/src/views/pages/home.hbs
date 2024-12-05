@@ -1,44 +1,32 @@
 {{> header }}
-
-
-<!--<div class="nav_bar">
-    <p class="nav_text">Navigation</p>
-    <ul class="vertical ex">
-        <div class="nav_item">
-            <a class="active" href="javascript:void(0)">Home</a></li>
-        </div>
-        <div>
-            <a class="active" href="javascript:void(0)">Profile</a></li>
-        </div>
-        <div>
-            <a class="active" href="javascript:void(0)">Create Post</a></li>
-        </div>
-    </ul>
-</div>-->
-
 {{> nav }}
-     
-
-
 <div id="timeline_grid" class="home_list">
     {{#if movies.length}}
     <ul>
       {{#each movies}}
-        <div class="home_item display:flex; flex-direction: column">
+        <div class="home_item" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
           <h2>{{this.movietitle}}</h2>
-          <img src="{{this.movieimage}}" alt="{{this.movietitle}}"  style="width: 200px; height: 300px; object-fit: cover;"/>
-          <p>{{this.moviedescription}}</p>
-          <p><strong>Release Date:</strong> {{this.releasedate}}</p>
-          <h3>Comments:</h3>
-          <p>friend_1: Great movie!</p>
-          <p>friend_2: 10/10!</p>
-        </div>
-      {{/each}}
-    </ul>
-  {{else}}
-    <p>No movies found.</p>
-  {{/if}}
-
+          <img src="{{this.movieimage}}" alt="{{this.movietitle}}" style="width: 200px; height: 300px; object-fit: cover; margin: 10px 0;"/>
+          <p style="text-align: center;">{{this.moviedescription}}</p>
+          <p style="text-align: center;"><strong>Release Date:</strong> {{this.releasedate}}</p>
+          <h3>Reviews:</h3>
+      {{#if this.reviews.length}}
+        {{#each this.reviews}}
+          <div class="review" style="border: 1px solid #ddd; margin: 5px 0; padding: 10px; width: 100%; max-width: 400px; text-align: left;">
+            <p><strong>{{this.username}}:</strong> {{this.reviewbody}}</p>
+            {{#if this.movierating}}
+              <p>Rating: {{this.movierating}}/10</p>
+            {{/if}}
+          </div>
+        {{/each}}
+      {{else}}
+        <p>No reviews yet.</p>
+      {{/if}}
+    </div>
+  {{/each}}
+</ul>
+{{else}}
+<p>No movies found.</p>
+{{/if}}
 </div>
-
- {{> footer }}
+{{> footer }}
