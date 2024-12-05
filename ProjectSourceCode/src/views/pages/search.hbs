@@ -1,47 +1,42 @@
-{{> header }}
+{{> header}}
 
-{{> nav }}
+{{> nav}}
 
-<div style="background-color: #F6F7EB; min-height: 100vh; padding: 20px; color: #050014;">
-  <div class="container d-flex justify-content-center align-items-center min-vh-100">
-    <div style="width: 300px; padding: 20px; border-radius: 12px; background-color: #F6F7EB;">
-      {{#if error}}
-        <p class="error" style="color: red; font-weight: bold; margin-bottom: 20px;">{{error}}</p>
-      {{/if}}
+<div class="container mt-5">
+  <h1 class="text-center mb-4">Search</h1>
 
-      <form action="/search" method="POST" style="text-align: center;">
-        <div class="mb-3">
-          <label for="searchType" class="form-label">Search By:</label>
-          <select 
-            name="searchType" 
-            id="searchType" 
-            class="form-control rounded" 
-            style="background-color: #7A001B; color: #F6F7EB; border: 1px solid #A30023;">
-            <option value="byUser">User</option>
-            <option value="byMovie">Movie</option>
-            <option value="byBody">Review Body</option>
-          </select>
-        </div>
+  {{#if error}}
+    <div class="alert alert-danger text-center">{{error}}</div>
+  {{/if}}
 
-        <div class="mb-3">
-          <input 
-            type="text" 
-            name="query" 
-            placeholder="Enter search query" 
-            class="form-control rounded" 
-            style="background-color: #7A001B; color: #F6F7EB; border: 1px solid #A30023; placeholder: #F6F7EB" 
-            required>
-        </div>
-
-        <button 
-          type="submit" 
-          class="btn w-100 rounded" 
-          style="background-color: #7A001B; color: #F6F7EB; border: 1px solid #A30023;">
-          Search
-        </button>
-      </form>
+  <form method="POST" action="/search">
+    <div class="mb-3">
+      <label for="searchType" class="form-label">Search By:</label>
+      <select id="searchType" name="searchType" class="form-select" required>
+        <option value="" disabled {{#unless searchType}}selected{{/unless}}>Choose a search type</option>
+        <option value="byUser" {{#if searchType}}{{#ifCond searchType 'byUser'}}selected{{/ifCond}}{{/if}}>User</option>
+        <option value="byMovie" {{#if searchType}}{{#ifCond searchType 'byMovie'}}selected{{/ifCond}}{{/if}}>Movie Title</option>
+        <option value="byBody" {{#if searchType}}{{#ifCond searchType 'byBody'}}selected{{/ifCond}}{{/if}}>Review Body</option>
+      </select>
     </div>
-  </div>
+
+    <div class="mb-3">
+      <label for="query" class="form-label">Search Query:</label>
+      <input 
+        type="text" 
+        id="query" 
+        name="query" 
+        class="form-control" 
+        placeholder="Enter your query" 
+        value="{{query}}" 
+        required
+      >
+    </div>
+
+    <div class="text-center">
+      <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+  </form>
 </div>
 
-{{>footer}}
+{{> footer}}

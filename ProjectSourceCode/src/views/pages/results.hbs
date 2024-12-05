@@ -2,23 +2,33 @@
 
 {{> nav}}
 
-<div id="timeline_grid" class="home_list">
+<div class="container mt-5">
+  <h1 class="text-center mb-4">Search Results</h1>
+
+  {{#if error}}
+    <div class="alert alert-danger text-center">{{error}}</div>
+  {{/if}}
+
   {{#if results.length}}
-    <ul>
+    <div class="list-group">
       {{#each results}}
-        <li>
-          <h2>{{this.movietitle}}</h2>
+        <div class="list-group-item mb-3">
+          <h4 class="mb-1">{{this.movietitle}}</h4>
           <p><strong>Author:</strong> {{this.author}}</p>
-          <p>{{this.moviedescription}}</p>
-          <p><strong>Review:</strong> {{this.reviewbody}}</p>
-          <p><strong>Release Date:</strong> {{this.releasedate}}</p>
-          <img src="{{this.movieimage}}" alt="{{this.movietitle}}" style="max-width: 300px;" />
-        </li>
+
+          {{#if this.moviedescription}}
+            <p><strong>Movie Description:</strong> {{this.moviedescription}}</p>
+          {{/if}}
+
+          {{#if this.reviewbody}}
+            <p><strong>Review:</strong> {{this.reviewbody}}</p>
+          {{/if}}
+        </div>
       {{/each}}
-    </ul>
+    </div>
   {{else}}
-    <p>No results found.</p>
+    <p class="text-center">No results found.</p>
   {{/if}}
 </div>
 
-{{> footer }}
+{{> footer}}

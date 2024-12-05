@@ -310,19 +310,25 @@ app.get('/search', (req, res) => {
 app.post('/search', async (req, res) => {
   const { searchType, query } = req.body;
 
-  // validate user input
+  // Validate user input
   if (!query || !searchType) {
+    console.log('Validation failed: Missing query or searchType'); // Debug log
     req.session.error = 'Search type and query are required.';
     return res.redirect('/search');
   }
 
   try {
     let results = [];
+    console.log('Search initiated with:', { searchType, query }); // Debug log
 
     if (searchType === 'byUser') {
-      // search for reviews by a specific user
+      console.log('Searching by user...'); // Debug log
       results = await db.any(
-        `SELECT r.ReviewId, m.MovieTitle, c.Username AS Author, r.ReviewBody
+        `SELECT 
+          r.ReviewId AS reviewid, 
+          m.MovieTitle AS movietitle, 
+          c.Username AS author, 
+          r.ReviewBody AS reviewbody
          FROM Review r
          JOIN Client c ON r.ClientId = c.ClientId
          JOIN Movie m ON r.MovieId = m.MovieId
@@ -331,9 +337,13 @@ app.post('/search', async (req, res) => {
         [`%${query}%`]
       );
     } else if (searchType === 'byMovie') {
-      // search for revews of a specific movie
+      console.log('Searching by movie...'); // Debug log
       results = await db.any(
-        `SELECT r.ReviewId, m.MovieTitle, c.Username AS Author, r.ReviewBody
+        `SELECT 
+          r.ReviewId AS reviewid, 
+          m.MovieTitle AS movietitle, 
+          c.Username AS author, 
+          r.ReviewBody AS reviewbody
          FROM Review r
          JOIN Client c ON r.ClientId = c.ClientId
          JOIN Movie m ON r.MovieId = m.MovieId
@@ -342,9 +352,13 @@ app.post('/search', async (req, res) => {
         [`%${query}%`]
       );
     } else if (searchType === 'byBody') {
-      // search for reviews contaiining specific text
+      console.log('Searching by review body...'); // Debug log
       results = await db.any(
-        `SELECT r.ReviewId, m.MovieTitle, c.Username AS Author, r.ReviewBody
+        `SELECT 
+          r.ReviewId AS reviewid, 
+          m.MovieTitle AS movietitle, 
+          c.Username AS author, 
+          r.ReviewBody AS reviewbody
          FROM Review r
          JOIN Client c ON r.ClientId = c.ClientId
          JOIN Movie m ON r.MovieId = m.MovieId
@@ -353,26 +367,31 @@ app.post('/search', async (req, res) => {
         [`%${query}%`]
       );
     } else {
+      console.log('Invalid search type provided:', searchType); // Debug log
       req.session.error = 'Invalid search type.';
       return res.redirect('/search');
     }
 
-    // if no results are found send error
+    console.log('Search results:', results); // Debug log for results
+
     if (results.length === 0) {
+      console.log('No results found for query:', query); // Debug log
       req.session.error = 'No results found.';
       return res.redirect('/search');
     }
 
-    // store the results in the session and redirect to results page
+    // Store results in the session and redirect to results page
     req.session.results = results;
-    req.session.error = null; // clear any previous errors
+    req.session.error = null; // Clear previous errors
+    console.log('Redirecting to results page with results'); // Debug log
     res.redirect('/results');
   } catch (error) {
-    console.error('Error during search:', error);
+    console.error('Error during search:', error); // Debug log for errors
     req.session.error = 'An error occurred during the search. Please try again.';
     res.redirect('/search');
   }
 });
+
 
 app.get('/results', (req, res) => {
   const error = req.session.error || null;
