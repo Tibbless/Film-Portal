@@ -39,7 +39,79 @@
 
 Docker
   
-  
+## Directory Structure
+```
+Film-Portal/
+├── MilestoneSubmissions/                   
+│   ├── lab-11-materials/         
+|      └── UAT_criteria.txt
+│   ├── lab-9-materials/
+|      ├── ProjectPresentation_011-7.pdf
+|      ├── db_schema.PNG
+|      └── placeholder.txt               
+├── ProjectSourceCode
+|      ├── src/
+|         ├── init_data/
+|            ├── create.sql
+|            └── insert.sql
+|         ├── resources/
+|            ├── css/
+|               ├── bootstrap-grid.css
+|               ├── bootstrap-grid.css.map
+|               ├── bootstrap-grid.min.css
+|               ├── bootstrap-grid.min.css.map
+|               ├── bootstrap-reboot.css
+|               ├── bootstrap-reboot.css.map
+|               ├── bootstrap-reboot.min.css
+|               ├── bootstrap-reboot.min.css.map
+|               ├── bootstrap.css
+|               ├── bootstrap.css.map
+|               ├── bootstrap.min.css
+|               ├── bootstrap.min.css.map
+|               └── style.css
+|            ├── img/
+|               └── home.png
+|            └── js/
+|               ├── bootstrap.bundle.js
+|               ├── bootstrap.bundle.js.map
+|               ├── bootstrap.bundle.min.js
+|               ├── bootstrap.bundle.min.js.map
+|               ├── bootstrap.js
+|               ├── bootstrap.js.map
+|               ├── bootstrap.min.js
+|               ├── bootstrap.min.js.map
+|               └── script.js
+|         ├── views/
+|            ├── layouts/
+|               └── main.hbs
+|            ├── pages/
+|               ├── create-post.hbs
+|               ├── home.hbs
+|               ├── login.hbs
+|               ├── message.hbs
+|               ├── profile.hbs
+|               ├── register.hbs
+|               ├── results.hbs
+|               ├── search.hbs
+|               └── settings.hbs
+|            └── partials/
+|               ├── footer.hbs
+|               ├── header.hbs
+|               ├── message.hbs
+|               └── nav.hbs
+|         └── index.js
+|      ├── test/
+|         └── server.spec.js
+|      ├── .gitattributes
+|      ├── .gitignore
+|      ├── docker-compose.yaml
+|      ├── package-lock.json
+|      └── package.json
+└── TeamMeetingLogs/
+       ├──.gitignore
+       └── ReadMe.md
+
+```
 
 ## Instructions to Run Locally:
 
